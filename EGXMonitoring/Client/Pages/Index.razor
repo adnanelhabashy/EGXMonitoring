@@ -1,5 +1,5 @@
 ﻿@page "/"
-
+@inject IWidgetService WidgetService
 <PageTitle>Index</PageTitle>
 
 <h1>Hello, world!</h1>
@@ -7,3 +7,11 @@
 Welcome to your new app.
 
 <SurveyPrompt Title="How is Blazor working for you?" />
+
+@code {
+    List<ServiceResponse<Widget>> widgets;
+    protected override async Task OnInitializedAsync()
+    {
+        widgets = await WidgetService.GetWidgets();
+    }
+}

@@ -1,5 +1,6 @@
 global using EGXMonitoring.Shared;
 using EGXMonitoring.Server.Data;
+using EGXMonitoring.Server.Services.WidgetService;
 using Microsoft.AspNetCore.ResponseCompression;
 using Microsoft.EntityFrameworkCore;
 
@@ -18,6 +19,8 @@ builder.Services.AddRazorPages();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddScoped<IWidgetService, WidgetService>();
 
 
 var app = builder.Build();
