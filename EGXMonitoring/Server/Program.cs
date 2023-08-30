@@ -1,11 +1,24 @@
+global using EGXMonitoring.Shared;
+using EGXMonitoring.Server.Data;
 using Microsoft.AspNetCore.ResponseCompression;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
+
+var connectionString = builder.Configuration.GetConnectionString("OracleConnection");
+builder.Services.AddDbContext<DataContext>(options => {
+    options.UseOracle((connectionString), b => b.UseOracleSQLCompatibility("11"));
+    options.UseQueryTrackingBehavior(QueryTrackingBehavior.NoTracking);
+});
 // Add services to the container.
 
 builder.Services.AddControllersWithViews();
 builder.Services.AddRazorPages();
+
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
 
 var app = builder.Build();
 
@@ -20,6 +33,9 @@ else
     // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
+
+app.UseSwaggerUI();
+app.UseSwagger();
 
 app.UseHttpsRedirection();
 
