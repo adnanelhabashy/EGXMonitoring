@@ -2,12 +2,14 @@
 using EGXMonitoring.Shared.DTOS;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using Oracle.ManagedDataAccess.Client;
 using System.Data;
+using System.Text.Json.Nodes;
 
 namespace EGXMonitoring.Server.Services.WidgetService
 {
-    public class WidgetService:IWidgetService
+    public class WidgetService : IWidgetService
     {
         private readonly DataContext _context;
 
@@ -17,28 +19,28 @@ namespace EGXMonitoring.Server.Services.WidgetService
         }
 
 
-        public async Task<List<ServiceResponse<Widget>>> GetWidgetsInfo()
+        public async Task<ServiceResponse<List<ClientWidget>>> GetWidgetsInfo()
         {
             var widgetsInfo = await _context.Widgets.ToListAsync();
-            var result = new List<ServiceResponse<Widget>>();
-
+            var result = new ServiceResponse<List<ClientWidget>>();
+            result.Data = new List<ClientWidget>();
             foreach (var widgetInfo in widgetsInfo)
             {
-                result.Add(new ServiceResponse<Widget>()
+                result.Data.Add(new ClientWidget()
                 {
-                    Data = widgetInfo
+                    WidgetInfo = widgetInfo,
                 });
             }
 
-            foreach (var widgetInfo in result)
+            foreach (var widgetInfo in result.Data)
             {
-                widgetInfo.Message = GetWidgetsData(widgetInfo.Data);
+                widgetInfo.Data = GetWidgetsData(widgetInfo.WidgetInfo);
             }
 
             return result;
         }
 
-        public string GetWidgetsData(Widget widgetInfo)
+        public List<Dictionary<string, object>> GetWidgetsData(Widget widgetInfo)
         {
             if (widgetInfo != null)
             {
@@ -50,15 +52,36 @@ namespace EGXMonitoring.Server.Services.WidgetService
                     {
                         connection.Open();
 
-                        using (OracleCommand command = new OracleCommand(widgetInfo.SQLCOMMAND, connection))
+                        using (OracleCommand command = new OracleCommand("Select groupname,value from DATAMONITOR", connection))
                         {
                             using (OracleDataReader reader = command.ExecuteReader())
                             {
+
                                 DataTable dataTable = new DataTable();
                                 dataTable.Load(reader);
+                                List<Dictionary<string, object>> rows = new List<Dictionary<string, object>>();
+                                foreach (DataRow dataRow in dataTable.Rows)
+                                {
+                                    Dictionary<string, object> row = new Dictionary<string, object>();
 
-                                string dataTableJson = JsonConvert.SerializeObject(dataTable);
-                                return dataTableJson;
+                                    // Iterate over the columns in each row
+                                    foreach (DataColumn column in dataTable.Columns)
+                                    {
+                                        // Get the column name and value for the current row
+                                        string columnName = column.ColumnName;
+                                        object columnValue = dataRow[columnName];
+
+                                        // Add the column name and value to the dictionary
+                                        row[columnName] = columnValue;
+                                    }
+
+                                    // Add the row to the list
+                                    rows.Add(row);
+                                }
+
+                                return rows;    
+                                //string dataTableJson = JsonConvert.SerializeObject(dataTable);
+                                //return dataTableJson;
                             }
                         }
                     }
@@ -71,7 +94,7 @@ namespace EGXMonitoring.Server.Services.WidgetService
             }
             else
             {
-                return string.Empty;
+                return null;
             }
         }
     }

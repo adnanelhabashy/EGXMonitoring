@@ -16,7 +16,7 @@ namespace EGXMonitoring.Server.Controllers
             _widgetService = widgetService;
         }
         [HttpGet]
-        public async Task<ActionResult<List<ServiceResponse<Widget>>>> GetWidgetsData()
+        public async Task<ActionResult<ServiceResponse<List<ClientWidget>>>> GetWidgetsData()
         {
             var info = await _widgetService.GetWidgetsInfo();
             return Ok(info);
