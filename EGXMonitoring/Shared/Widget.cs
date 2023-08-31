@@ -20,6 +20,7 @@ namespace EGXMonitoring.Shared
         public string SQLCOMMAND { get; set; } = string.Empty;
         public string CONNCETIONSTRINGID { get; set; } = string.Empty;
         public string CONDITION { get; set; } = string.Empty;
+        public decimal? WIDGETTYPE { get; set; }
 
     }
 }

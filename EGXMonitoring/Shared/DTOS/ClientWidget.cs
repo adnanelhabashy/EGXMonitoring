@@ -13,6 +13,5 @@ namespace EGXMonitoring.Shared.DTOS
     public class ClientWidget
     {
         public Widget WidgetInfo { get; set; } = new Widget();
-        public List<Dictionary<string, object>> Data { get; set; } =   new List<Dictionary<string, object>> ();
     }
 }

@@ -11,10 +11,16 @@ namespace EGXMonitoring.Client.Services.WidgetService
         {
             _http = http;
         }
-        public async Task<ServiceResponse<List<ClientWidget>>> GetWidgets()
+        public async Task<ServiceResponse<List<ClientWidget>>> GetWidgetsInfo()
         {
             var widgets = await _http.GetFromJsonAsync<ServiceResponse<List<ClientWidget>>>("api/Widgets");
             return widgets;
+        }
+
+        public async Task<ServiceResponse<List<Dictionary<string, object>>>> GetWidgetData(ClientWidget widget)
+        {
+            var result = await _http.PostAsJsonAsync("api/Widgets/WidgetData", widget);
+            return await result.Content.ReadFromJsonAsync<ServiceResponse<List<Dictionary<string, object>>>>();
         }
     }
 }

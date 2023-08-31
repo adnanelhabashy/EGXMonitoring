@@ -32,15 +32,10 @@ namespace EGXMonitoring.Server.Services.WidgetService
                 });
             }
 
-            foreach (var widgetInfo in result.Data)
-            {
-                widgetInfo.Data = GetWidgetsData(widgetInfo.WidgetInfo);
-            }
-
             return result;
         }
 
-        public List<Dictionary<string, object>> GetWidgetsData(Widget widgetInfo)
+        public ServiceResponse<List<Dictionary<string, object>>> GetWidgetData(Widget widgetInfo)
         {
             if (widgetInfo != null)
             {
@@ -52,7 +47,7 @@ namespace EGXMonitoring.Server.Services.WidgetService
                     {
                         connection.Open();
 
-                        using (OracleCommand command = new OracleCommand("Select groupname,value from DATAMONITOR", connection))
+                        using (OracleCommand command = new OracleCommand("Select * from DATAMONITOR", connection))
                         {
                             using (OracleDataReader reader = command.ExecuteReader())
                             {
@@ -78,10 +73,10 @@ namespace EGXMonitoring.Server.Services.WidgetService
                                     // Add the row to the list
                                     rows.Add(row);
                                 }
-
-                                return rows;    
-                                //string dataTableJson = JsonConvert.SerializeObject(dataTable);
-                                //return dataTableJson;
+                                return new ServiceResponse<List<Dictionary<string, object>>>()
+                                {
+                                    Data = rows
+                                };    
                             }
                         }
                     }
@@ -96,6 +91,11 @@ namespace EGXMonitoring.Server.Services.WidgetService
             {
                 return null;
             }
+        }
+
+        public ServiceResponse<List<Dictionary<string, object>>> GetWidgetsData(Widget widgetsInfo)
+        {
+            throw new NotImplementedException();
         }
     }
 }

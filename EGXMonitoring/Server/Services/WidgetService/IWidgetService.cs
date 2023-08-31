@@ -7,6 +7,6 @@ namespace EGXMonitoring.Server.Services.WidgetService
     public interface IWidgetService
     {
         Task<ServiceResponse<List<ClientWidget>>> GetWidgetsInfo();
-        List<Dictionary<string, object>> GetWidgetsData(Widget widgetsInfo);
+        ServiceResponse<List<Dictionary<string, object>>> GetWidgetData(Widget widgetInfo);
     }
 }
