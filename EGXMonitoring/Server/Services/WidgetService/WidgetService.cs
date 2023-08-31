@@ -47,7 +47,7 @@ namespace EGXMonitoring.Server.Services.WidgetService
                     {
                         connection.Open();
 
-                        using (OracleCommand command = new OracleCommand("Select * from DATAMONITOR", connection))
+                        using (OracleCommand command = new OracleCommand(widgetInfo.SQLCOMMAND, connection))
                         {
                             using (OracleDataReader reader = command.ExecuteReader())
                             {

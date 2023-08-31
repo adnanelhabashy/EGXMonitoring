@@ -21,6 +21,8 @@ namespace EGXMonitoring.Shared
         public string CONNCETIONSTRINGID { get; set; } = string.Empty;
         public string CONDITION { get; set; } = string.Empty;
         public decimal? WIDGETTYPE { get; set; }
+        public string? NAMECOLUMN { get; set; } = string.Empty;
+        public string? VALUECOLMN { get; set; } = string.Empty;
 
     }
 }

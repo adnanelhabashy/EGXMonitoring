@@ -1,14 +1,18 @@
 ﻿@page "/"
 @inject IWidgetService WidgetService
 
-@foreach (var widget in WidgetInfo.Data)
+@if(WidgetInfo.Data != null)
 {
-    <SyncWidget WidgetInfo=widget />
+    @foreach (var widget in WidgetInfo.Data)
+    {
+        <SyncWidgetComponent WidgetInfo=widget />
+    }
 }
 
 
+
 @code {
-    public ServiceResponse<List<ClientWidget>> WidgetInfo{ get; set; }
+    public ServiceResponse<List<ClientWidget>> WidgetInfo { get; set; } = new ServiceResponse<List<ClientWidget>>();
 
     protected override async Task OnInitializedAsync()
     {

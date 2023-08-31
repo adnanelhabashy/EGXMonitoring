@@ -1,10 +1,8 @@
-﻿
-@inject IWidgetService WidgetService
-
+﻿@inject IWidgetService WidgetService
 <div class="row">
     <div class="col-md-6">
         <div class="card">
-            @* <div class="card-header border-transparent">
+            <div class="card-header border-transparent">
                 <h3 class="card-title">@WidgetInfo.WidgetInfo.NAME</h3>
 
                 <div class="card-tools">
@@ -13,21 +11,21 @@
                     </button>
 
                 </div>
-            </div> *@
+            </div>
             <!-- /.card-header -->
             <div class="card-body p-0">
                 <div class="table-responsive">
                     <table class="table m-0">
                         <thead>
-           @*                  <tr>
+                            <tr>
                                 @foreach (var columnName in ColumnNames)
                                 {
                                     <th>@columnName</th>
                                 }
-                            </tr> *@
+                            </tr>
                         </thead>
                         <tbody>
-@*                             @foreach (var row in Rows)
+                            @foreach (var row in Rows)
                             {
                                 <tr>
                                     @foreach (var column in ColumnNames)
@@ -35,7 +33,7 @@
                                         <td>@row[column]</td>
                                     }
                                 </tr>
-                            } *@
+                            }
                         </tbody>
                     </table>
                 </div>
@@ -43,22 +41,25 @@
             </div>
             <!-- /.card-body -->
             <div class="card-footer clearfix">
-                <a href="javascript:void(0)" class="btn btn-sm btn-info float-left">Place New Order</a>
-                <a href="javascript:void(0)" class="btn btn-sm btn-secondary float-right">View All Orders</a>
+              @*   <a href="javascript:void(0)" class="btn btn-sm btn-info float-left">Place New Order</a>
+                <a href="javascript:void(0)" class="btn btn-sm btn-secondary float-right">View All Orders</a> *@
             </div>
             <!-- /.card-footer -->
         </div>
 
     </div>
 </div>
+
 @code {
     [Parameter]
     public ClientWidget WidgetInfo { get; set; }
-    List<Dictionary<string, object>> Rows { get; set; }
-    List<string> ColumnNames { get; set; }
+
+    List<Dictionary<string, object>> Rows { get; set; } = new List<Dictionary<string, object>>();
+    List<string> ColumnNames { get; set; } = new List<string>();
 
     private Timer timer;
     private int refreshIntervalInSeconds;
+
 
     protected override async Task OnInitializedAsync()
     {
