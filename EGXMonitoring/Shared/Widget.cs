@@ -16,13 +16,11 @@ namespace EGXMonitoring.Shared
         public int ID { get; set; }
         public string NAME { get; set; } = string.Empty;
         public int REFRESHINTERVAL { get; set; }
-        public int NOOFCOLUMNS { get; set; }
         public string SQLCOMMAND { get; set; } = string.Empty;
-        public string CONNCETIONSTRINGID { get; set; } = string.Empty;
-        public string CONDITION { get; set; } = string.Empty;
+        public string CONNCETIONSTRING { get; set; } = string.Empty;
         public decimal? WIDGETTYPE { get; set; }
-        public string? NAMECOLUMN { get; set; } = string.Empty;
         public string? VALUECOLMN { get; set; } = string.Empty;
-
+        public string? GROUPCOLUMN { get; set; } = string.Empty;
+        public decimal? CHECKTYPE { get; set; } 
     }
 }

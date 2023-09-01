@@ -5,6 +5,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Oracle.ManagedDataAccess.Client;
 using System.Data;
+using System.Reflection.Metadata.Ecma335;
 using System.Text.Json.Nodes;
 
 namespace EGXMonitoring.Server.Services.WidgetService
@@ -21,28 +22,41 @@ namespace EGXMonitoring.Server.Services.WidgetService
 
         public async Task<ServiceResponse<List<ClientWidget>>> GetWidgetsInfo()
         {
-            var widgetsInfo = await _context.Widgets.ToListAsync();
-            var result = new ServiceResponse<List<ClientWidget>>();
-            result.Data = new List<ClientWidget>();
-            foreach (var widgetInfo in widgetsInfo)
+            try
             {
-                result.Data.Add(new ClientWidget()
+                var widgetsInfo = await _context.Widgets.ToListAsync();
+                var result = new ServiceResponse<List<ClientWidget>>();
+                result.Data = new List<ClientWidget>();
+                foreach (var widgetInfo in widgetsInfo)
                 {
-                    WidgetInfo = widgetInfo,
-                });
+                    result.Data.Add(new ClientWidget()
+                    {
+                        WidgetInfo = widgetInfo,
+                    });
+                }
+
+                return result;
             }
-
-            return result;
+            catch (Exception ex)
+            {
+                return new ServiceResponse<List<ClientWidget>>()
+                {
+                    Data = null,
+                    Message = ex.Message,
+                    Success = false
+                };
+            }
+            
         }
-
         public ServiceResponse<List<Dictionary<string, object>>> GetWidgetData(Widget widgetInfo)
         {
             if (widgetInfo != null)
             {
-                string connectionString = widgetInfo.CONNCETIONSTRINGID;
+                string connectionString = widgetInfo.CONNCETIONSTRING;
 
                 using (OracleConnection connection = new OracleConnection(connectionString))
                 {
+                    string errorGroupsMessage = string.Empty;
                     try
                     {
                         connection.Open();
@@ -54,6 +68,19 @@ namespace EGXMonitoring.Server.Services.WidgetService
 
                                 DataTable dataTable = new DataTable();
                                 dataTable.Load(reader);
+
+                                if(!string.IsNullOrEmpty(widgetInfo.GROUPCOLUMN))
+                                {
+                                    List<string> errorGroups = ValidateWidget(dataTable, widgetInfo);
+                                    if (errorGroups.Count > 0)
+                                    {
+                                        foreach (var group in errorGroups)
+                                        {
+                                            errorGroupsMessage += group + ";";
+                                        }
+                                    }
+                                }
+                               
                                 List<Dictionary<string, object>> rows = new List<Dictionary<string, object>>();
                                 foreach (DataRow dataRow in dataTable.Rows)
                                 {
@@ -73,9 +100,12 @@ namespace EGXMonitoring.Server.Services.WidgetService
                                     // Add the row to the list
                                     rows.Add(row);
                                 }
+                               
+
                                 return new ServiceResponse<List<Dictionary<string, object>>>()
                                 {
-                                    Data = rows
+                                    Data = rows,
+                                    Message = errorGroupsMessage!= string.Empty ? errorGroupsMessage : string.Empty
                                 };    
                             }
                         }
@@ -83,7 +113,12 @@ namespace EGXMonitoring.Server.Services.WidgetService
                     catch (Exception ex)
                     {
                         Console.WriteLine("An error occurred while executing the query: " + ex.Message);
-                        return null;
+                        return new ServiceResponse<List<Dictionary<string, object>>>()
+                        {
+                            Data = null,
+                            Message = ex.Message,
+                            Success = false
+                        };
                     }
                 }
             }
@@ -93,9 +128,20 @@ namespace EGXMonitoring.Server.Services.WidgetService
             }
         }
 
-        public ServiceResponse<List<Dictionary<string, object>>> GetWidgetsData(Widget widgetsInfo)
+        public List<string> ValidateWidget(DataTable widgetData, Widget widgetInfo)
         {
-            throw new NotImplementedException();
+            List<string> result = new List<string>();
+            var groupedData = widgetData.AsEnumerable()
+                    .GroupBy(row => row.Field<string>(widgetInfo.GROUPCOLUMN));
+            foreach (var group in groupedData)
+            {
+                var distinctValues = group.Select(row => row.Field<decimal>(widgetInfo.VALUECOLMN)).Distinct();
+                if (distinctValues.Count() > 1)
+                {
+                    result.Add(group.Key);
+                }
+            }
+            return result;
         }
     }
 }
