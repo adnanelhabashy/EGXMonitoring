@@ -70,7 +70,7 @@ namespace EGXMonitoring.Server.Services.WidgetService
 
                                 DataTable dataTable = new DataTable();
                                 dataTable.Load(reader);
-
+                                
                                 if (!string.IsNullOrEmpty(widgetInfo.GROUPCOLUMN))
                                 {
                                     List<string> errorGroups = ValidateWidget(dataTable, widgetInfo);
@@ -82,7 +82,6 @@ namespace EGXMonitoring.Server.Services.WidgetService
                                         }
                                     }
                                 }
-
                                 List<Dictionary<string, object>> rows = new List<Dictionary<string, object>>();
                                 foreach (DataRow dataRow in dataTable.Rows)
                                 {
@@ -97,16 +96,12 @@ namespace EGXMonitoring.Server.Services.WidgetService
 
                                         // Add the column name and value to the dictionary
                                         row[columnName] = columnValue;
+                                       
                                     }
-
-
+                                 
                                     // Add the row to the list
                                     rows.Add(row);
                                 }
-
-                                var groupedData = rows.GroupBy(d => d[widgetInfo.GROUPCOLUMN]);
-
-
                                 return new ServiceResponse<List<Dictionary<string, object>>>()
                                 {
                                     Data = rows,

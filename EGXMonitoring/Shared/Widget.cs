@@ -21,6 +21,8 @@ namespace EGXMonitoring.Shared
         public decimal? WIDGETTYPE { get; set; }
         public string? VALUECOLMN { get; set; } = string.Empty;
         public string? GROUPCOLUMN { get; set; } = string.Empty;
-        public decimal? CHECKTYPE { get; set; } 
+        public decimal? CHECKTYPE { get; set; }
+        public int? ALARMAFTER { get; set; }
+        public DateTime? AFTERTIME { get; set; }
     }
 }
