@@ -1,12 +1,11 @@
 ﻿@inject IWidgetService WidgetService
 @inject IJSRuntime JSRuntime
-@using System.Globalization;
 @using Microsoft.JSInterop
+@using System.Globalization
+
 @using System.Data
 
-<br />
-<div class="row">
-    <div class="col-md-4">
+
         <div class="card" id="Card">
             <div class="card-header border-transparent">
                 <h3 class="card-title">@WidgetInfo.WidgetInfo.NAME - <strong>Sync Widget</strong></h3>
@@ -124,8 +123,6 @@
             <!-- /.card-footer -->
         </div>
 
-    </div>
-</div>
 
 <script>
     window.enterFullScreen = function (elementId) {
@@ -270,7 +267,10 @@
         }
     }
 
-
+    public void Refresh()
+    {
+      
+    }
    
 
 

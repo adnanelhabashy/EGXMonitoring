@@ -1,21 +1,54 @@
 ﻿@page "/"
 @inject IWidgetService WidgetService
 
-@if(WidgetInfo.Data != null)
-{
-    @foreach (var widget in WidgetInfo.Data)
-    {
-        <SyncWidgetComponent WidgetInfo=widget />
+<style>
+    .dark-tile-layout {
+        background-color: #454d55;
+        color: white;
     }
+
+    .dark-tile-layout-card {
+        background-color: #343a40;
+        color: white;
+    }
+
+</style>
+@if (WidgetInfo.Data != null)
+{
+
+    <TelerikTileLayout class="dark-tile-layout" Columns="12"
+                           ColumnWidth="100%"
+                           RowHeight="100%"
+                           Height="Auto"
+                           Reorderable="true"
+                           Resizable="true">
+            <TileLayoutItems>
+                @foreach (var widget in WidgetInfo.Data)
+                {
+                <TileLayoutItem class="dark-tile-layout-card" HeaderText="@widget.WidgetInfo.NAME" ColSpan="3">
+                        <Content>
+                            <SyncWidgetComponent WidgetInfo=@widget />
+                        </Content>
+                    </TileLayoutItem>
+                }
+            </TileLayoutItems>
+        </TelerikTileLayout>
+  
 }
 
 
 
 @code {
-    public ServiceResponse<List<ClientWidget>> WidgetInfo { get; set; } = new ServiceResponse<List<ClientWidget>>();
 
+
+    public ServiceResponse<List<ClientWidget>> WidgetInfo { get; set; } = new ServiceResponse<List<ClientWidget>>();
+    public TelerikTileLayout TileLayoutInstance { get; set; }
+    SyncWidgetComponent syncompRef { get; set; }
     protected override async Task OnInitializedAsync()
     {
         WidgetInfo = await WidgetService.GetWidgetsInfo();
+
     }
+
+
 }
