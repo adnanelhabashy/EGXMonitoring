@@ -6,6 +6,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Oracle.ManagedDataAccess.Client;
 using System.Data;
+using System.Linq;
 using System.Reflection.Metadata.Ecma335;
 using System.Text.Json.Nodes;
 
@@ -47,7 +48,7 @@ namespace EGXMonitoring.Server.Services.WidgetService
                     Success = false
                 };
             }
-            
+
         }
         public ServiceResponse<List<Dictionary<string, object>>> GetWidgetData(Widget widgetInfo)
         {
@@ -70,7 +71,7 @@ namespace EGXMonitoring.Server.Services.WidgetService
                                 DataTable dataTable = new DataTable();
                                 dataTable.Load(reader);
 
-                                if(!string.IsNullOrEmpty(widgetInfo.GROUPCOLUMN))
+                                if (!string.IsNullOrEmpty(widgetInfo.GROUPCOLUMN))
                                 {
                                     List<string> errorGroups = ValidateWidget(dataTable, widgetInfo);
                                     if (errorGroups.Count > 0)
@@ -81,7 +82,7 @@ namespace EGXMonitoring.Server.Services.WidgetService
                                         }
                                     }
                                 }
-                               
+
                                 List<Dictionary<string, object>> rows = new List<Dictionary<string, object>>();
                                 foreach (DataRow dataRow in dataTable.Rows)
                                 {
@@ -97,18 +98,20 @@ namespace EGXMonitoring.Server.Services.WidgetService
                                         // Add the column name and value to the dictionary
                                         row[columnName] = columnValue;
                                     }
-                                    row["Key"] = dataRow[widgetInfo.GROUPCOLUMN];
+
 
                                     // Add the row to the list
                                     rows.Add(row);
                                 }
-                                var groupedRows = rows.GroupBy(r => r["Key"]);
+
+                                var groupedData = rows.GroupBy(d => d[widgetInfo.GROUPCOLUMN]);
+
 
                                 return new ServiceResponse<List<Dictionary<string, object>>>()
                                 {
                                     Data = rows,
-                                    Message = errorGroupsMessage!= string.Empty ? errorGroupsMessage : string.Empty
-                                };    
+                                    Message = errorGroupsMessage != string.Empty ? errorGroupsMessage : string.Empty
+                                };
                             }
                         }
                     }

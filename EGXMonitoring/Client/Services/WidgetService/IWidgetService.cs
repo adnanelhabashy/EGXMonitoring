@@ -1,4 +1,5 @@
 ﻿using EGXMonitoring.Shared.DTOS;
+using System.Data;
 
 namespace EGXMonitoring.Client.Services.WidgetService
 {
@@ -6,7 +7,7 @@ namespace EGXMonitoring.Client.Services.WidgetService
     {
         Task<ServiceResponse<List<ClientWidget>>> GetWidgetsInfo();
 
-        Task<ServiceResponse<List<Dictionary<string, object>>>> GetWidgetData(ClientWidget widget);
+        Task<ServiceResponse<DataTable>> GetWidgetData(ClientWidget widget);
 
     }
 }
