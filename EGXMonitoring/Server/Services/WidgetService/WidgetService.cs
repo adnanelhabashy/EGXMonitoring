@@ -1,6 +1,7 @@
 ﻿using EGXMonitoring.Server.Data;
 using EGXMonitoring.Shared.DTOS;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using Oracle.ManagedDataAccess.Client;
@@ -96,11 +97,12 @@ namespace EGXMonitoring.Server.Services.WidgetService
                                         // Add the column name and value to the dictionary
                                         row[columnName] = columnValue;
                                     }
+                                    row["Key"] = dataRow[widgetInfo.GROUPCOLUMN];
 
                                     // Add the row to the list
                                     rows.Add(row);
                                 }
-                               
+                                var groupedRows = rows.GroupBy(r => r["Key"]);
 
                                 return new ServiceResponse<List<Dictionary<string, object>>>()
                                 {
