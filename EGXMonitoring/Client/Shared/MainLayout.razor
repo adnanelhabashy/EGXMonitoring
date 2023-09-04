@@ -1,17 +1,34 @@
 ﻿@inherits LayoutComponentBase
+@inject NavigationManager NavManager
 
-<div class="page">
-    <SideBar />
-    <Header />
+@if (NavManager.Uri.Contains("Login"))
+{
+    <div class="hold-transition login-page">
+        <div class="login-box">
+            <div class="card card-outline card-primary">
+                @Body
+            </div>
+        </div>
+    </div>
+}
+else
+{
+    <div class="page">
+        <SideBar />
+        <Header />
 
 
-    <main>
-       
+        <main>
 
-        <article class="content-wrapper">
-            @Body
-        </article>
-    </main>
 
-    <Footer />
-</div>
+            <article class="content-wrapper">
+                @Body
+            </article>
+        </main>
+
+        <Footer />
+    </div>
+
+}
+
+
