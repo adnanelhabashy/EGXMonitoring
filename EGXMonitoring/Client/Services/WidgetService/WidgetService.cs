@@ -31,7 +31,6 @@ namespace EGXMonitoring.Client.Services.WidgetService
 
         }
 
-
         private DataTable ManipulateData(List<Dictionary<string, object>> dataList)
         {
             DataTable result = new DataTable();
@@ -55,5 +54,7 @@ namespace EGXMonitoring.Client.Services.WidgetService
 
             return result;
         }
+
+    
     }
 }

@@ -143,5 +143,73 @@ namespace EGXMonitoring.Server.Services.WidgetService
             }
             return result;
         }
+
+        public ServiceResponse<List<Dictionary<string, object>>> GetStatusWidgetData(Widget widgetInfo)
+        {
+            if (widgetInfo != null)
+            {
+                string connectionString = widgetInfo.CONNCETIONSTRING;
+
+                using (OracleConnection connection = new OracleConnection(connectionString))
+                {
+                
+                    try
+                    {
+                        connection.Open();
+
+                        using (OracleCommand command = new OracleCommand(widgetInfo.SQLCOMMAND, connection))
+                        {
+                            using (OracleDataReader reader = command.ExecuteReader())
+                            {
+
+                                DataTable dataTable = new DataTable();
+                                dataTable.Load(reader);
+
+                               
+                                List<Dictionary<string, object>> rows = new List<Dictionary<string, object>>();
+                                foreach (DataRow dataRow in dataTable.Rows)
+                                {
+                                    Dictionary<string, object> row = new Dictionary<string, object>();
+
+                                    // Iterate over the columns in each row
+                                    foreach (DataColumn column in dataTable.Columns)
+                                    {
+                                        // Get the column name and value for the current row
+                                        string columnName = column.ColumnName;
+                                        object columnValue = dataRow[columnName];
+
+                                        // Add the column name and value to the dictionary
+                                        row[columnName] = columnValue;
+
+                                    }
+
+                                    // Add the row to the list
+                                    rows.Add(row);
+                                }
+                                return new ServiceResponse<List<Dictionary<string, object>>>()
+                                {
+                                    Data = rows,
+                                    Message = "Data retrived susccessfully"
+                                };
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("An error occurred while executing the query: " + ex.Message);
+                        return new ServiceResponse<List<Dictionary<string, object>>>()
+                        {
+                            Data = null,
+                            Message = ex.Message,
+                            Success = false
+                        };
+                    }
+                }
+            }
+            else
+            {
+                return null;
+            }
+        }
     }
 }

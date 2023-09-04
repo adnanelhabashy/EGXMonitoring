@@ -2,108 +2,72 @@
 @inject IJSRuntime JSRuntime
 @using Microsoft.JSInterop
 @using System.Globalization
-
 @using System.Data
 
 
-        <div class="card" id="Card">
-            <div class="card-header border-transparent">
-                <h3 class="card-title">@WidgetInfo.WidgetInfo.NAME - <strong>Sync Widget</strong></h3>
+<div class="card" id="Card">
+    <div class="card-header border-transparent">
+        <h3 class="card-title"><strong>Sync Widget</strong></h3>
 
-                <div class="card-tools">
-                    <button type="button" @onclick="ToggleFullScreen" class="btn btn-tool">
-                        <i class="fa fa-fw fa-bars"></i>
-                    </button>
-                    <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                        <i class="fas fa-minus"></i>
-                    </button>
-                    <button type="button" @onclick="RefreshWidget" class="btn btn-tool">
-                        <i class="fa fa-fw fa-retweet"></i>
-                    </button>
-                    <div class="btn btn-tool">@DateTime.Now.ToString("hh:mm:ss tt")</div>
-                </div>
+        <div class="card-tools">
+            <button type="button" @onclick="ToggleFullScreen" class="btn btn-tool">
+                <i class="fa fa-fw fa-bars"></i>
+            </button>
+@*             <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                <i class="fas fa-minus"></i>
+            </button> *@
+            <button type="button" @onclick="RefreshWidget" class="btn btn-tool">
+                <i class="fa fa-fw fa-retweet"></i>
+            </button>
+            <div class="btn btn-tool">@DateTime.Now.ToString("hh:mm:ss tt")</div>
+        </div>
+    </div>
+    <!-- /.card-header -->
+    @if (isLoading)
+    {
+        <div class="loading-animation">
+
+            <div class="spinner-border" role="status">
+                <span class="sr-only">Loading...</span>
             </div>
-            <!-- /.card-header -->
-            @if (isLoading)
-            {
-                <div class="loading-animation">
+        </div>
+    }
+    else
+    {
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table m-0">
+                    <thead>
+                        <tr>
+                            @foreach (var column in table.Columns)
+                            {
+                                <th>@column.ToString()</th>
+                            }
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (!string.IsNullOrEmpty(WidgetInfo.WidgetInfo.GROUPCOLUMN))
+                        {
+                            var groupedData = table.AsEnumerable()
+                            .GroupBy(row => row.Field<string>(WidgetInfo.WidgetInfo.GROUPCOLUMN));
 
-                    <div class="spinner-border" role="status">
-                        <span class="sr-only">Loading...</span>
-                    </div>
-                </div>
-            }
-            else
-            {
-                <div class="card-body p-0">
-                    <div class="table-responsive">
-                        <table class="table m-0">
-                            <thead>
-                                <tr>
-                                    @foreach (var column in table.Columns)
-                                    {
-                                        <th>@column.ToString()</th>
-                                    }
-                                </tr>
-                            </thead>
-                            <tbody>
-                                @if (!string.IsNullOrEmpty(WidgetInfo.WidgetInfo.GROUPCOLUMN))
+                            @foreach (var group in groupedData)
+                            {
+                                if (errors.Contains(@group.Key))
                                 {
-                                    var groupedData = table.AsEnumerable()
-                                    .GroupBy(row => row.Field<string>(WidgetInfo.WidgetInfo.GROUPCOLUMN));
-
-                                    @foreach (var group in groupedData)
+                                    var lowestValue = group.Min(row => row.Field<string>(WidgetInfo.WidgetInfo.VALUECOLMN));
+                                    if (!SearchErrorTime(@group.Key))
                                     {
-                                        if (errors.Contains(@group.Key))
-                                        {
-                                            var lowestValue = group.Min(row => row.Field<string>(WidgetInfo.WidgetInfo.VALUECOLMN));
-                                            if (!SearchErrorTime(@group.Key))
-                                            {
-                                                ErrorTime[@group.Key] = DateTime.Now;
-                                            }
-                                            string warningLevel =  ProcessWarning(GetErrortime(group.Key).ToString("hh:mm:ss tt"));
-                                            <tr class="@warningLevel" style="background-color:#423d3c;color:red">
-                                                <td colspan="@table.Columns.Count" style="text-align: center;">@group.Key Not in sync <strong>@GetErrortime(@group.Key).ToString("hh:mm:ss tt")</strong></td>
-                                            </tr>
-                                            @foreach (DataRow row in group)
-                                            {
-                                                var columnValue = row.Field<string>(WidgetInfo.WidgetInfo.VALUECOLMN);
-                                                <tr class="red-tint" style="@(columnValue == lowestValue ? "background-color:black;color:red" : "")">
-                                                    @foreach (DataColumn column in table.Columns)
-                                                    {
-                                                        <td>@row[column]</td>
-                                                    }
-                                                </tr>
-                                            }
-                                        }
-                                        else
-                                        {
-                                            if (SearchErrorTime(@group.Key))
-                                            {
-                                                RemoveErrorTime(@group.Key);
-                                            }
-                                         
-                                            <tr>
-                                                <td colspan="@table.Columns.Count">@group.Key</td>
-                                            </tr>
-                                            @foreach (DataRow row in group)
-                                            {
-                                                <tr style="background-color:grey">
-                                                    @foreach (DataColumn column in table.Columns)
-                                                    {
-                                                        <td>@row[column]</td>
-                                                    }
-                                                </tr>
-                                            }
-                                        }
-
+                                        ErrorTime[@group.Key] = DateTime.Now;
                                     }
-                                }
-                                else
-                                {
-                                    @foreach (DataRow row in table.Rows)
+                                    string warningLevel = ProcessWarning(GetErrortime(group.Key).ToString("hh:mm:ss tt"));
+                                    <tr class="@warningLevel" style="background-color:#423d3c;color:red">
+                                        <td colspan="@table.Columns.Count" style="text-align: center;">@group.Key Not in sync <strong>@GetErrortime(@group.Key).ToString("hh:mm:ss tt")</strong></td>
+                                    </tr>
+                                    @foreach (DataRow row in group)
                                     {
-                                        <tr>
+                                        var columnValue = row.Field<string>(WidgetInfo.WidgetInfo.VALUECOLMN);
+                                        <tr class="red-tint" style="@(columnValue == lowestValue ? "background-color:black;color:red" : "")">
                                             @foreach (DataColumn column in table.Columns)
                                             {
                                                 <td>@row[column]</td>
@@ -111,17 +75,52 @@
                                         </tr>
                                     }
                                 }
-                            </tbody>
-                        </table>
-                    </div>
-                    <!-- /.table-responsive -->
-                </div>
-            }
-            <!-- /.card-body -->
-            <div class="card-footer clearfix">
+                                else
+                                {
+                                    if (SearchErrorTime(@group.Key))
+                                    {
+                                        RemoveErrorTime(@group.Key);
+                                    }
+
+                                    <tr>
+                                        <td colspan="@table.Columns.Count">@group.Key</td>
+                                    </tr>
+                                    @foreach (DataRow row in group)
+                                    {
+                                        <tr style="background-color:grey">
+                                            @foreach (DataColumn column in table.Columns)
+                                            {
+                                                <td>@row[column]</td>
+                                            }
+                                        </tr>
+                                    }
+                                }
+
+                            }
+                        }
+                        else
+                        {
+                            @foreach (DataRow row in table.Rows)
+                            {
+                                <tr>
+                                    @foreach (DataColumn column in table.Columns)
+                                    {
+                                        <td>@row[column]</td>
+                                    }
+                                </tr>
+                            }
+                        }
+                    </tbody>
+                </table>
             </div>
-            <!-- /.card-footer -->
+            <!-- /.table-responsive -->
         </div>
+    }
+    <!-- /.card-body -->
+    <div class="card-footer clearfix">
+    </div>
+    <!-- /.card-footer -->
+</div>
 
 
 <script>
@@ -149,9 +148,6 @@
             document.msExitFullscreen();
         }
     };
-
-
-
 </script>
 
 @code {
@@ -247,7 +243,7 @@
         DateTime currentTime = DateTime.Now;
         DateTime parsedTime = DateTime.ParseExact(time, "hh:mm:ss tt", CultureInfo.InvariantCulture);
         TimeSpan timeDifference = parsedTime - currentTime;
-        long timeDifferenceMilliseconds = (long)timeDifference.TotalMilliseconds*-1;
+        long timeDifferenceMilliseconds = (long)timeDifference.TotalMilliseconds * -1;
 
         if (timeDifferenceMilliseconds >= 0 && timeDifferenceMilliseconds <= Level1)
         {
@@ -259,7 +255,7 @@
         }
         else if (timeDifferenceMilliseconds >= Level2 && timeDifferenceMilliseconds <= Level3)
         {
-            return  "blinking3-row";
+            return "blinking3-row";
         }
         else
         {
@@ -269,9 +265,9 @@
 
     public void Refresh()
     {
-      
+
     }
-   
+
 
 
 

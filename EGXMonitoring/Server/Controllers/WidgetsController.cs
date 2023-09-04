@@ -26,8 +26,19 @@ namespace EGXMonitoring.Server.Controllers
         [HttpPost("WidgetData")]
         public  ActionResult<ServiceResponse<List<Dictionary<string, object>>>> GetWidgetData(ClientWidget widget)
         {
-            var data =  _widgetService.GetWidgetData(widget.WidgetInfo);
+            ServiceResponse<List<Dictionary<string, object>>> data = new ServiceResponse<List<Dictionary<string, object>>>();
+            if (widget.WidgetInfo.WIDGETTYPE == 1)
+            {
+                 data = _widgetService.GetWidgetData(widget.WidgetInfo);
+            }
+            else if (widget.WidgetInfo.WIDGETTYPE == 2)
+            {
+                 data = _widgetService.GetStatusWidgetData(widget.WidgetInfo);
+            }
+               
             return Ok(data);
         }
+
+
     }
 }

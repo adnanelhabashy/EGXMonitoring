@@ -1,5 +1,10 @@
 ﻿@inject NavigationManager NavigationManager
-
+<style>
+    ol {
+        list-style: none;
+        padding-left: 0;
+    }
+</style>
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
     <!-- Brand Logo -->
     <a href="index3.html" class="brand-link">
@@ -45,21 +50,52 @@
                         </p>
                     </NavLink>
                 </li>
-                <li class="nav-item ">
-                     <NavLink href="/widgets" class="nav-link" Match="NavLinkMatch.All">
+                <li class="nav-item">
+                    <NavLink href="#" class="nav-link" onclick="toggleSubMenu()" Match="NavLinkMatch.All">
                         <i class="nav-icon fas fa-th"></i>
                         <p>
                             Widgets
                         </p>
+                        <i id="toggleIcon" class="fas fa-chevron-down"></i>
                     </NavLink>
+                    <ul id="subMenu" class="sub-menu">
+                        <li class="nav-item">
+                            <i class="far fa-circle nav-icon"></i>
+                            <NavLink href="/sublink1">Sublink 1</NavLink>
+                        </li>
+                        <li class="nav-item">
+                            <i class="far fa-circle nav-icon"></i>
+                            <NavLink href="/sublink1">Sublink 1</NavLink>
+                        </li>
+                        <li class="nav-item">
+                            <i class="far fa-circle nav-icon"></i>
+                            <NavLink href="/sublink1">Sublink 1</NavLink>
+                        </li>
+                    </ul>
                 </li>
-
+               
             </ul>
         </nav>
         <!-- /.sidebar-menu -->
     </div>
     <!-- /.sidebar -->
 </aside>
+
+<script>
+    function toggleSubMenu() {
+        var subMenu = document.getElementById("subMenu");
+        var toggleIcon = document.getElementById("toggleIcon");
+        if (subMenu.style.display === "none") {
+            subMenu.style.display = "block";
+            toggleIcon.classList.remove("fa-chevron-down");
+            toggleIcon.classList.add("fa-chevron-up");
+        } else {
+            subMenu.style.display = "none";
+            toggleIcon.classList.remove("fa-chevron-up");
+            toggleIcon.classList.add("fa-chevron-down");
+        }
+    }
+</script>
 @code {
 
 }

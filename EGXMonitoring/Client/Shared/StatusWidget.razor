@@ -1,0 +1,160 @@
+﻿@inject IWidgetService WidgetService
+@inject IJSRuntime JSRuntime
+@using Microsoft.JSInterop
+@using System.Globalization
+@using System.Data
+
+
+
+<div class="card-@WidgetInfo.WidgetInfo.NAME">
+    <div class="card-header border-transparent">
+        <h3 class="card-title"><strong>Status Widget</strong></h3>
+
+        <div class="card-tools">
+            <button type="button" @onclick="ToggleFullScreen" class="btn btn-tool">
+                <i class="fa fa-fw fa-bars"></i>
+            </button>
+@*             <button type="button" class="btn btn-tool" data-card-widget="collapse">
+                <i class="fas fa-minus"></i>
+            </button> *@
+            <button type="button" @onclick="RefreshWidget" class="btn btn-tool">
+                <i class="fa fa-fw fa-retweet"></i>
+            </button>
+            <div class="btn btn-tool">@DateTime.Now.ToString("hh:mm:ss tt")</div>
+        </div>
+    </div>
+    <!-- /.card-header -->
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table m-0">
+                <thead>
+                    <tr>
+                        @foreach (var column in table.Columns)
+                        {
+                            <th>@column.ToString()</th>
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (DataRow row in table.Rows)
+                    {
+                        <tr>
+                            @foreach (DataColumn column in table.Columns)
+                            {
+                                if(column.ColumnName == WidgetInfo.WidgetInfo.VALUECOLMN)
+                                {
+                                    if (@row[column].ToString() == "-1")
+                                    {
+                                        <td><span class="badge badge-danger">Error</span></td>
+                                    }
+                                    else if (@row[column].ToString() == "1" || @row[column].ToString() == "0")
+                                    {
+                                        <td><span class="badge badge-success">Success</span></td>
+                                    }
+                                    else
+                                    {
+                                        <td><span class="badge badge-info">@row[column]</span></td>
+                                    }
+                                }
+                                else
+                                {
+                                    <td>@row[column]</td>
+                                }
+                                
+                            }
+                        </tr>
+                    }
+                 
+
+                </tbody>
+            </table>
+        </div>
+        <!-- /.table-responsive -->
+    </div>
+    <!-- /.card-body -->
+    <div class="card-footer clearfix">
+        @*   <a href="javascript:void(0)" class="btn btn-sm btn-info float-left">Place New Order</a>
+        <a href="javascript:void(0)" class="btn btn-sm btn-secondary float-right">View All Orders</a> *@
+    </div>
+    <!-- /.card-footer -->
+</div>
+<script>
+    window.enterFullScreen = function (elementId) {
+        const element = document.getElementById(elementId);
+        if (element.requestFullscreen) {
+            element.requestFullscreen();
+        } else if (element.mozRequestFullScreen) {
+            element.mozRequestFullScreen();
+        } else if (element.webkitRequestFullscreen) {
+            element.webkitRequestFullscreen();
+        } else if (element.msRequestFullscreen) {
+            element.msRequestFullscreen();
+        }
+    };
+
+    window.exitFullScreen = function () {
+        if (document.exitFullscreen) {
+            document.exitFullscreen();
+        } else if (document.mozCancelFullScreen) {
+            document.mozCancelFullScreen();
+        } else if (document.webkitExitFullscreen) {
+            document.webkitExitFullscreen();
+        } else if (document.msExitFullscreen) {
+            document.msExitFullscreen();
+        }
+    };
+</script>
+@code {
+    [Parameter]
+    public ClientWidget WidgetInfo { get; set; }
+    private Timer timer;
+    private int refreshIntervalInSeconds;
+    DataTable table = new DataTable();
+    string message = string.Empty;
+
+    private bool isFullScreen = false;
+    private bool isLoading = true;
+    private bool isPlaying;
+
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        var Data = await WidgetService.GetWidgetData(WidgetInfo);
+        table = Data.Data;
+        message = Data.Message;
+
+        if (table.Rows.Count > 0)
+        {
+            //ColumnNames = Rows[0].Keys.ToList();
+            refreshIntervalInSeconds = WidgetInfo.WidgetInfo.REFRESHINTERVAL;
+            timer = new Timer(RefreshWidget, null, TimeSpan.Zero, TimeSpan.FromSeconds(refreshIntervalInSeconds));
+
+        }
+
+        isLoading = false;
+    }
+
+    private async Task ToggleFullScreen()
+    {
+        isFullScreen = !isFullScreen;
+
+        if (isFullScreen)
+        {
+            await JSRuntime.InvokeVoidAsync("enterFullScreen", "card-"+WidgetInfo.WidgetInfo.NAME);
+        }
+        else
+        {
+            await JSRuntime.InvokeVoidAsync("exitFullScreen");
+        }
+    }
+
+    private async void RefreshWidget(object state)
+    {
+        var Data = await WidgetService.GetWidgetData(WidgetInfo);
+        table = Data.Data;
+        message = Data.Message;
+
+        // Call the StateHasChanged method to notify the component to re-render
+        await InvokeAsync(StateHasChanged);
+    }
+}

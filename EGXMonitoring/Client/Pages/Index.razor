@@ -17,23 +17,41 @@
 {
 
     <TelerikTileLayout class="dark-tile-layout" Columns="12"
-                           ColumnWidth="100%"
-                           RowHeight="100%"
-                           Height="Auto"
-                           Reorderable="true"
-                           Resizable="true">
-            <TileLayoutItems>
-                @foreach (var widget in WidgetInfo.Data)
+                       ColumnWidth="100%"
+                       RowHeight="100%"
+                       Height="Auto"
+                       Reorderable="true"
+                       Resizable="true">
+        <TileLayoutItems>
+            @foreach (var widget in WidgetInfo.Data)
+            {
+                @if (widget.WidgetInfo.WIDGETTYPE == 1)
                 {
-                <TileLayoutItem class="dark-tile-layout-card" HeaderText="@widget.WidgetInfo.NAME" ColSpan="3">
+                    <TileLayoutItem class="dark-tile-layout-card"  ColSpan="3">
+                        <HeaderTemplate>
+                            <h4 style="color:white">@widget.WidgetInfo.NAME</h4>
+                        </HeaderTemplate>
                         <Content>
                             <SyncWidgetComponent WidgetInfo=@widget />
                         </Content>
                     </TileLayoutItem>
                 }
-            </TileLayoutItems>
-        </TelerikTileLayout>
-  
+                @if (widget.WidgetInfo.WIDGETTYPE == 2)
+                {
+                    <TileLayoutItem class="dark-tile-layout-card"  ColSpan="3">
+                        <HeaderTemplate>
+                            <h4 style="color:white">@widget.WidgetInfo.NAME</h4>
+                        </HeaderTemplate>
+                        <Content>
+                            <StatusWidget WidgetInfo=@widget />
+                        </Content>
+                    </TileLayoutItem>
+                }
+
+            }
+        </TileLayoutItems>
+    </TelerikTileLayout>
+
 }
 
 
