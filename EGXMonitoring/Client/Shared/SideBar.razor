@@ -1,8 +1,8 @@
 ﻿@inject NavigationManager NavigationManager
 <style>
-    ol {
+    ul, ol {
         list-style: none;
-        padding-left: 0;
+        padding-left: 20px;
     }
 </style>
 <aside class="main-sidebar sidebar-dark-primary elevation-4">
@@ -51,25 +51,45 @@
                     </NavLink>
                 </li>
                 <li class="nav-item">
-                    <NavLink href="#" class="nav-link" onclick="toggleSubMenu()" Match="NavLinkMatch.All">
+                    <NavLink href="#" class="nav-link" onclick="toggleSubMenu('WidgetMenu','toggleIcon')">
                         <i class="nav-icon fas fa-th"></i>
                         <p>
                             Widgets
                         </p>
-                        <i id="toggleIcon" class="fas fa-chevron-down"></i>
+                        <i id="toggleIcon" class="fas fa-chevron-up"></i>
                     </NavLink>
-                    <ul id="subMenu" class="sub-menu">
+                    <ul id="WidgetMenu" class="sub-menu">
                         <li class="nav-item">
                             <i class="far fa-circle nav-icon"></i>
-                            <NavLink href="/sublink1">Sublink 1</NavLink>
+                            <NavLink href="/sublink1">Create Widget</NavLink>
                         </li>
                         <li class="nav-item">
                             <i class="far fa-circle nav-icon"></i>
-                            <NavLink href="/sublink1">Sublink 1</NavLink>
+                            <NavLink href="/sublink2">Edit Widget</NavLink>
+                        </li>
+                     
+                    </ul>
+                </li>
+                <li class="nav-item">
+                    <NavLink href="#" class="nav-link" onclick="toggleSubMenu('UsersMenu','toggleIcon1')">
+                        <i class="fa fa-fw fa-user"></i>
+                        <p>
+                            Users
+                        </p>
+                        <i id="toggleIcon1" class="fas fa-chevron-up"></i>
+                    </NavLink>
+                    <ul id="UsersMenu" class="sub-menu">
+                        <li class="nav-item">
+                            <i class="far fa-circle nav-icon"></i>
+                            <NavLink href="/sublink1">Create User</NavLink>
                         </li>
                         <li class="nav-item">
                             <i class="far fa-circle nav-icon"></i>
-                            <NavLink href="/sublink1">Sublink 1</NavLink>
+                            <NavLink href="/sublink2">Edit User</NavLink>
+                        </li>
+                        <li class="nav-item">
+                            <i class="far fa-circle nav-icon"></i>
+                            <NavLink href="/sublink3">Set User Widgets</NavLink>
                         </li>
                     </ul>
                 </li>
@@ -82,10 +102,11 @@
 </aside>
 
 <script>
-    function toggleSubMenu() {
-        var subMenu = document.getElementById("subMenu");
-        var toggleIcon = document.getElementById("toggleIcon");
-        if (subMenu.style.display === "none") {
+    function toggleSubMenu(menuId,toggleIconId) {
+        var subMenu = document.getElementById(menuId);
+        var toggleIcon = document.getElementById(toggleIconId);
+
+        if (subMenu.style.display === "none" || subMenu.style.display === "") {
             subMenu.style.display = "block";
             toggleIcon.classList.remove("fa-chevron-down");
             toggleIcon.classList.add("fa-chevron-up");
