@@ -15,7 +15,8 @@ namespace EGXMonitoring.Shared
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ID { get; set; }
         public string USERNAME { get; set; } = string.Empty;    
-        public string PASSWORD { get; set; }= string.Empty;   
+        public byte[] PASSWORDHASH { get; set; }
+        public byte[] PASSWORDSALT { get; set; }
         public int ISACTIVE { get; set; }
         public DateTime CREATEDON { get; set; }
         public int ISADMIN { get; set; }

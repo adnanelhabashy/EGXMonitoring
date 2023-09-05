@@ -1,5 +1,15 @@
 ﻿@page "/Login"
 
+
+@inject IAuthService AuthService
+@inject ILocalStorageService LocalStorage
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+
+<PageTitle>Login</PageTitle>
+
+
 <div class="card-header text-center">
     <b>EGX Monitoring</b>
     <br />
@@ -8,9 +18,11 @@
 <div class="card-body">
     <p class="login-box-msg">Sign in to start your Monitoring session</p>
 
-    <form action="../../index3.html" method="post">
+    <EditForm Model="User" OnValidSubmit="HandleLogin">
+        <DataAnnotationsValidator></DataAnnotationsValidator>
         <div class="input-group mb-3">
-            <input type="email" class="form-control" placeholder="Username">
+            <InputText id="Username" @bind-Value="User.Username" class="form-control"></InputText>
+            <ValidationMessage For="@(() => User.Username)"></ValidationMessage>
             <div class="input-group-append">
                 <div class="input-group-text">
                     <span class="fas fa-user"></span>
@@ -18,7 +30,8 @@
             </div>
         </div>
         <div class="input-group mb-3">
-            <input type="password" class="form-control" placeholder="Password">
+            <InputText id="password" @bind-Value="User.Password" class="form-control" type="password"></InputText>
+            <ValidationMessage For="@(() => User.Password)"></ValidationMessage>
             <div class="input-group-append">
                 <div class="input-group-text">
                     <span class="fas fa-lock"></span>
@@ -38,19 +51,46 @@
             <div class="col-4">
                 <button type="submit" class="btn btn-primary btn-block">Login</button>
             </div>
+            <ValidationSummary></ValidationSummary>
             <!-- /.col -->
         </div>
-    </form>
+    </EditForm>
 
-   
+    <div class="text-danger">
+        @errorMessage
+    </div>
     <!-- /.social-auth-links -->
 
-    <p class="mb-1">
-        <a href="forgot-password.html">I forgot my password</a>
-    </p>
+
 
 </div>
 
 @code {
+    private UserLogin User = new UserLogin();
+    private string errorMessage = string.Empty;
+    private string returnUrl = string.Empty;
+    protected override void OnInitialized()
+    {
+        var uri = NavigationManager.ToAbsoluteUri(NavigationManager.Uri);
+        if (QueryHelpers.ParseQuery(uri.Query).TryGetValue("returnUrl", out var url))
+        {
+            returnUrl = url;
+        }
+    }
+    private async Task HandleLogin()
+    {
+        var result = await AuthService.Login(User);
+        if (result.Success)
+        {
+            //errorMessage = string.Empty;
+            await LocalStorage.SetItemAsync("authToken", result.Data);
+            await AuthenticationStateProvider.GetAuthenticationStateAsync();
 
+            NavigationManager.NavigateTo("/");
+        }
+        else
+        {
+            errorMessage = result.Message;
+        }
+    }
 }

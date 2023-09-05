@@ -1,7 +1,7 @@
 ﻿@inherits LayoutComponentBase
 @inject NavigationManager NavManager
 
-@if (NavManager.Uri.Contains("Login"))
+@if (NavManager.Uri.ToLower().Contains("login"))
 {
     <div class="hold-transition login-page">
         <div class="login-box">

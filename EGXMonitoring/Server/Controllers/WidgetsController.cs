@@ -2,11 +2,14 @@
 using Microsoft.AspNetCore.Mvc;
 using EGXMonitoring.Server.Services.WidgetService;
 using EGXMonitoring.Shared.DTOS;
+using Microsoft.AspNetCore.Authorization;
+using System.Security.Claims;
 
 namespace EGXMonitoring.Server.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+
     public class WidgetsController : ControllerBase
     {
         private readonly IWidgetService _widgetService;
@@ -16,6 +19,7 @@ namespace EGXMonitoring.Server.Controllers
             _widgetService = widgetService;
         }
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult<ServiceResponse<List<ClientWidget>>>> GetWidgetInfo()
         {
             var info = await _widgetService.GetWidgetsInfo();
