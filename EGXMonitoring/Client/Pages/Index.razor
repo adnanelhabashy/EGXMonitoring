@@ -1,6 +1,8 @@
 ﻿@page "/"
 @inject IWidgetService WidgetService
+@attribute [Authorize]
 
+<AuthorizeView>
 <style>
     .dark-tile-layout {
         background-color: #454d55;
@@ -53,8 +55,7 @@
     </TelerikTileLayout>
 
 }
-
-
+</AuthorizeView>
 
 @code {
 

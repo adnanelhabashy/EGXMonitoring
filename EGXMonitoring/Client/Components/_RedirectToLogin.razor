@@ -1,0 +1,11 @@
+﻿@code {
+
+    protected override async Task OnInitializedAsync()
+    {
+        var logged = (await _authStateProvider.GetAuthenticationStateAsync()).User.Identity.IsAuthenticated;
+        if (!logged)
+        {
+            NavigationManager.NavigateTo("/login", true, true);
+        }
+    }
+}

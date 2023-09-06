@@ -13,12 +13,15 @@
 @using EGXMonitoring.Client.Services.WidgetService
 @using Newtonsoft.Json
 
+
 @using EGXMonitoring.Client.Services.AuthService
 
 @using Blazored.LocalStorage;
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.WebUtilities
+@using Microsoft.AspNetCore.Authorization
 
+@using EGXMonitoring.Client.Components
 
 @using Telerik.Blazor
 @using Telerik.Blazor.Services
@@ -26,4 +29,8 @@
 @using Telerik.Blazor.Components.Drawer
 @using Telerik.Blazor.Components.TileLayout
 
+
+
 @inject IJSRuntime JSRuntime
+@inject NavigationManager NavigationManager
+@inject AuthenticationStateProvider _authStateProvider
