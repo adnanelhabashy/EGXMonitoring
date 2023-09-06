@@ -9,7 +9,7 @@ namespace EGXMonitoring.Server.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-
+    [Authorize]
     public class WidgetsController : ControllerBase
     {
         private readonly IWidgetService _widgetService;

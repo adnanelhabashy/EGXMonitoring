@@ -2,6 +2,7 @@ global using EGXMonitoring.Shared;
 global using EGXMonitoring.Server.Services.AuthService;
 global using EGXMonitoring.Server.Data;
 global using EGXMonitoring.Server.Services.WidgetService;
+global using EGXMonitoring.Server.Services.UsersService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
@@ -24,6 +25,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IWidgetService, WidgetService>();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

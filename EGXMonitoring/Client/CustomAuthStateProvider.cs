@@ -28,7 +28,14 @@ namespace EGXMonitoring.Client
             {
                 try
                 {
-                    identity = new ClaimsIdentity(ParseClaimsFromJwt(authToken), "jwt");
+                    var claims = ParseClaimsFromJwt(authToken);
+                    identity = new ClaimsIdentity(claims, "jwt");
+                    var isAdmin = IsAdmin(claims);
+                    if (isAdmin)
+                    {
+                        // Add the admin claim to the identity
+                        identity.AddClaim(new Claim(ClaimTypes.Role, "Admin"));
+                    }
                     _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authToken.Replace("\"", ""));
                 }
                 catch
@@ -62,6 +69,11 @@ namespace EGXMonitoring.Client
 
             var claims = KeyValuePairs.Select(kv => new Claim(kv.Key, kv.Value.ToString()));
             return claims;
+        }
+
+        private bool IsAdmin(IEnumerable<Claim> claims)
+        {
+            return claims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
         }
 
     }

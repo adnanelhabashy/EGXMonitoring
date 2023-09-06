@@ -1,4 +1,6 @@
 ﻿@inject NavigationManager NavigationManager
+@attribute [Authorize]
+@using Microsoft.AspNetCore.Authorization
 <style>
     ul, ol {
         list-style: none;
@@ -50,6 +52,7 @@
                         </p>
                     </NavLink>
                 </li>
+                <AuthorizeView Policy="AdminOnly">
                 <li class="nav-item">
                     <NavLink href="#" class="nav-link" onclick="toggleSubMenu('WidgetMenu','toggleIcon')">
                         <i class="nav-icon fas fa-th"></i>
@@ -93,6 +96,7 @@
                         </li>
                     </ul>
                 </li>
+                </AuthorizeView>
                
             </ul>
         </nav>

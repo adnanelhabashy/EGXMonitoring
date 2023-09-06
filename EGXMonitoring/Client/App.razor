@@ -3,7 +3,14 @@
         <Found Context="routeData">
             <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
                 <NotAuthorized>
-                    <_RedirectToLogin></_RedirectToLogin>
+                    @if (context.User.Identity.IsAuthenticated)
+                    {
+                        <div class="m-2 h5 alert alert-danger" role="alert"></div>
+                    }
+                    else
+                    {
+                        <_RedirectToLogin></_RedirectToLogin>
+                    }
                 </NotAuthorized>
             </AuthorizeRouteView>
             <FocusOnNavigate RouteData="@routeData" Selector="h1" />
