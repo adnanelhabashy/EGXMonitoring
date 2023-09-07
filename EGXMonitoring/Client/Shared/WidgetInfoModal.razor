@@ -1,0 +1,39 @@
+﻿<div class="modal fade" style="padding-top: 50px;z-index: 1050;position: fixed; " sty id="@WidgetInfo.WidgetInfo.NAME">
+    <div  class="modal-dialog  modal-overlay">
+        <div class="modal-content bg-info">
+            <div class="modal-header">
+                <h4 class="modal-title"><strong>@WidgetInfo.WidgetInfo.NAME</strong> - Information</h4>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p><strong style="font-size:25px">Query :</strong> <strong style="font-size:20px;color:darkslateblue">@WidgetInfo.WidgetInfo.SQLCOMMAND</strong></p>
+                <p><strong style="font-size:25px">Connection String :</strong>  <strong style="font-size:15px;color:red">@WidgetInfo.WidgetInfo.CONNCETIONSTRING</strong></p>
+                <p><strong style="font-size:25px">Description :</strong>  <strong style="font-size:20px;color:blueviolet">@WidgetInfo.WidgetInfo.DESCRIPTION</strong></p>
+            </div>
+            <div class="modal-footer justify-content-between">
+                <button type="button" class="btn btn-outline-light" data-dismiss="modal">Close</button>
+               
+            </div>
+        </div>
+        <!-- /.modal-content -->
+    </div>
+    <!-- /.modal-dialog -->
+</div>
+<style>
+    .modal-backdrop {
+        z-index: -1;
+    }
+</style>
+@code {
+    [Parameter]
+    public ClientWidget WidgetInfo { get; set; }
+    private bool IsOpen { get; set; }
+
+    private void CloseModal()
+    {
+        IsOpen = false;
+    }
+
+}

@@ -1,25 +1,30 @@
 ﻿<CascadingAuthenticationState>
-    <Router AppAssembly="@typeof(App).Assembly">
-        <Found Context="routeData">
-            <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
-                <NotAuthorized>
-                    @if (context.User.Identity.IsAuthenticated)
-                    {
-                        <div class="m-2 h5 alert alert-danger" role="alert"></div>
-                    }
-                    else
-                    {
-                        <_RedirectToLogin></_RedirectToLogin>
-                    }
-                </NotAuthorized>
-            </AuthorizeRouteView>
-            <FocusOnNavigate RouteData="@routeData" Selector="h1" />
-        </Found>
-        <NotFound>
-            <PageTitle>Not found</PageTitle>
-            <LayoutView Layout="@typeof(MainLayout)">
-                <p role="alert">Sorry, there's nothing at this address.</p>
-            </LayoutView>
-        </NotFound>
-    </Router>
+    <TelerikRootComponent >
+        <Router AppAssembly="@typeof(App).Assembly">
+            <Found Context="routeData">
+                <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
+                    <NotAuthorized>
+                        @if (context.User.Identity.IsAuthenticated)
+                        {
+                            <div class="m-2 h5 alert alert-danger" role="alert"></div>
+                        }
+                        else
+                        {
+                            <_RedirectToLogin></_RedirectToLogin>
+                        }
+                    </NotAuthorized>
+                    <Authorizing>
+                        <div class="p-2 m-2 h5" >Authorizing User ...</div>
+                    </Authorizing>
+                </AuthorizeRouteView>
+                <FocusOnNavigate RouteData="@routeData" Selector="h1" />
+            </Found>
+            <NotFound>
+                <PageTitle>Not found</PageTitle>
+                <LayoutView Layout="@typeof(MainLayout)">
+                    <p role="alert">Sorry, there's nothing at this address.</p>
+                </LayoutView>
+            </NotFound>
+        </Router>
+    </TelerikRootComponent>
 </CascadingAuthenticationState>

@@ -1,0 +1,213 @@
+﻿@page "/usermanagment"
+@inject IUserService UserService
+@attribute [Authorize(Policy = "AdminOnly")]
+@using EGXMonitoring.Shared.DTOS
+
+
+
+
+<link rel="stylesheet" href="plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
+<link rel="stylesheet" href="plugins/datatables-responsive/css/responsive.bootstrap4.min.css">
+<link rel="stylesheet" href="plugins/datatables-buttons/css/buttons.bootstrap4.min.css">
+
+
+<br />
+
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">User Managment Table</h3>
+            </div>
+
+            <div class="card-body p-0">
+
+
+                <TelerikGrid Class="grid"
+                             EditMode="@GridEditMode.Inline"
+                             Data=@users
+                             ConfirmDelete="true"
+                             OnUpdate="@UpdateHandler"
+                             OnDelete="@DeleteHandler"
+                             OnCreate="@AddHandler"
+                             Pageable="true"
+                             Sortable="true">
+                    <GridToolBar>
+                        <GridCommandButton Command="Add">Add User</GridCommandButton>
+                    </GridToolBar>
+                    <GridSettings>
+                        <GridValidationSettings Enabled="@EnabledValidation" />
+                    </GridSettings>
+                    <GridColumns>
+                        <GridColumn Field="@nameof(User.USERNAME)" Title="Username" Width="195px" />
+                        <GridColumn Field="@nameof(User.ISADMIN)" Title="Is Admin" Width="195px">
+                            <Template>
+                                @{
+                                    var user = context as UserVM;
+                                    if (user.ISADMIN)
+                                    {
+                                        <span class="k-badge k-badge-md k-badge-solid k-badge-solid-success k-rounded-md">yes</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="k-badge k-badge-md k-badge-solid k-badge-solid-error  k-rounded-md">no</span>
+                                    }
+                                }
+                            </Template>
+
+                        </GridColumn>
+                        <GridColumn Field="@nameof(User.ISACTIVE)" Title="Is Active" Width="195px">
+                            <Template>
+                                @{
+                                    var user = context as UserVM;
+                                    if (user.ISACTIVE)
+                                    {
+                                        <span class="k-badge k-badge-md k-badge-solid k-badge-solid-success k-rounded-md">yes</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="k-badge k-badge-md k-badge-solid k-badge-solid-error  k-rounded-md">no</span>
+                                    }
+                                }
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="@nameof(User.RESETPASSWORD)" Title="Reset Password" Width="195px">
+                            <Template>
+                                @{
+                                    var user = context as UserVM;
+                                    if (user.RESETPASSWORD)
+                                    {
+                                        <span class="k-badge k-badge-md k-badge-solid k-badge-solid-success k-rounded-md">yes</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="k-badge k-badge-md k-badge-solid k-badge-solid-error  k-rounded-md">no</span>
+                                    }
+                                }
+                            </Template>
+                        </GridColumn>
+                        <GridColumn Field="@nameof(User.CREATEDON)" Title="Created on" Width="195px" />
+                        <GridColumn Field="@nameof(User.UPDATEDON)" Title="Updated on" Width="195px" />
+                        <GridCommandColumn Width="260px">
+                            <GridCommandButton Command="Edit" ThemeColor="@ThemeConstants.Button.ThemeColor.Primary">Edit</GridCommandButton>
+                            <GridCommandButton Command="Delete">Delete</GridCommandButton>
+
+                            <GridCommandButton Command="Save" ShowInEdit="true">Update</GridCommandButton>
+                            <GridCommandButton Command="Cancel" ShowInEdit="true">Cancel</GridCommandButton>
+                        </GridCommandColumn>
+                    </GridColumns>
+                </TelerikGrid>
+            </div>
+        </div>
+    </div>
+</div>
+@code {
+    List<UserVM> users { get; set; } = new List<UserVM>();
+    public bool EnabledValidation { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await UserService.GetUsers();
+        users = Map(result.Data);
+    }
+    private async Task LoadData()
+    {
+        var result = await UserService.GetUsers();
+        users = Map(result.Data);
+    }
+
+    private List<UserVM> Map(List<User> users)
+    {
+        List<UserVM> UsersModel = users.Select(src =>
+                                new UserVM
+                                    {
+                                        ID = src.ID,
+                                        USERNAME = src.USERNAME,
+                                        PASSWORDHASH = src.PASSWORDHASH,
+                                        PASSWORDSALT = src.PASSWORDSALT,
+                                        ISACTIVE = src.ISACTIVE == 1 ? true : false,
+                                        ISADMIN = src.ISADMIN == 1 ? true : false,
+                                        CREATEDON = src.CREATEDON,
+                                        UPDATEDON = src.UPDATEDON,
+                                        RESETPASSWORD = src.RESETPASSWORD == 1 ? true : false
+                                    }
+                                ).ToList();
+        return UsersModel;
+    }
+    private List<User> ReverseMap(List<UserVM> users)
+    {
+        List<User> UsersModel = users.Select(src =>
+                                new User
+                                    {
+                                        ID = src.ID,
+                                        USERNAME = src.USERNAME,
+                                        PASSWORDHASH = src.PASSWORDHASH,
+                                        PASSWORDSALT = src.PASSWORDSALT,
+                                        ISACTIVE = src.ISACTIVE ? 1 : 0,
+                                        ISADMIN = src.ISADMIN ? 1 : 0,
+                                        CREATEDON = src.CREATEDON,
+                                        UPDATEDON = src.UPDATEDON,
+                                        RESETPASSWORD = src.RESETPASSWORD ? 1 : 0
+                                    }
+                                ).ToList();
+        return UsersModel;
+    }
+
+    public async Task UpdateHandler(GridCommandEventArgs args)
+    {
+        var user = args.Item as UserVM;
+        var DtUser = new User()
+            {
+                ID = user.ID,
+                USERNAME = user.USERNAME,
+                PASSWORDHASH = user.PASSWORDHASH,
+                PASSWORDSALT = user.PASSWORDSALT,
+                ISACTIVE = user.ISACTIVE ? 1 : 0,
+                ISADMIN = user.ISADMIN ? 1 : 0,
+                CREATEDON = user.CREATEDON,
+                UPDATEDON = user.UPDATEDON,
+                RESETPASSWORD = user.RESETPASSWORD ? 1 : 0
+            };
+        var result = await UserService.UpdateUser(DtUser);
+        await LoadData();
+
+    }
+
+    public async Task DeleteHandler(GridCommandEventArgs args)
+    {
+        var user = args.Item as UserVM;
+        var DtUser = new User()
+            {
+                ID = user.ID,
+                USERNAME = user.USERNAME,
+                PASSWORDHASH = user.PASSWORDHASH,
+                PASSWORDSALT = user.PASSWORDSALT,
+                ISACTIVE = 0,
+                ISADMIN = user.ISADMIN ? 1 : 0,
+                CREATEDON = user.CREATEDON,
+                UPDATEDON = user.UPDATEDON,
+                RESETPASSWORD = user.RESETPASSWORD ? 1 : 0
+            };
+        var result = await UserService.DeleteUser(DtUser);
+        await LoadData();
+
+    }
+    public async Task AddHandler(GridCommandEventArgs args)
+    {
+        var user = args.Item as UserVM;
+        var DtUser = new User()
+            {
+                ID = user.ID,
+                USERNAME = user.USERNAME,
+                PASSWORDHASH = user.PASSWORDHASH,
+                PASSWORDSALT = user.PASSWORDSALT,
+                ISACTIVE = user.ISACTIVE ? 1 : 0,
+                ISADMIN = user.ISADMIN ? 1 : 0,
+                CREATEDON = user.CREATEDON,
+                UPDATEDON = user.UPDATEDON,
+                RESETPASSWORD = user.RESETPASSWORD ? 1 : 0
+            };
+        var result = await UserService.AddUser(DtUser);
+        await LoadData();
+    }
+}

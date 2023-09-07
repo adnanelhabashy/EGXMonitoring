@@ -1,0 +1,76 @@
+﻿@keyframes blink1 {
+    0% {
+        background-color: greenyellow;
+        color: white;
+    }
+
+    50% {
+        background-color: grey;
+        color: white;
+    }
+
+    100% {
+        background-color: greenyellow;
+        color: white;
+    }
+}
+
+
+@keyframes blink2 {
+    0% {
+        background-color: orangered;
+        color: white;
+    }
+
+    50% {
+        background-color: grey;
+        color: white;
+    }
+
+    100% {
+        background-color: orangered;
+        color: white;
+    }
+}
+
+
+@keyframes blink3 {
+    0% {
+        background-color: red;
+        color: white;
+    }
+
+    50% {
+        background-color: grey;
+        color: white;
+    }
+
+    100% {
+        background-color: red;
+        color: white;
+    }
+}
+
+.blinking1-row {
+    animation: blink1 1s infinite;
+}
+
+.blinking2-row {
+    animation: blink2 1s infinite;
+}
+
+.blinking3-row {
+    animation: blink3 1s infinite;
+}
+
+.loading-animation {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%; /* Set the height to 100% to fill the widget container */
+}
+
+    .loading-animation .spinner-border {
+        color: #3c8dbc; /* Set the color to match your theme */
+    }
+

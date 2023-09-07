@@ -1,73 +1,86 @@
 ﻿@page "/"
 @inject IWidgetService WidgetService
 @attribute [Authorize]
-
+<link rel="stylesheet" href="plugins/toastr/toastr.min.css">
 <AuthorizeView>
-<style>
-    .dark-tile-layout {
-        background-color: #454d55;
-        color: white;
+    <style>
+        .dark-tile-layout {
+            background-color: #454d55;
+            color: white;
+        }
+
+        .dark-tile-layout-card {
+            background-color: #343a40;
+            color: white;
+        }
+
+    </style>
+    @if (WidgetInfo.Data != null)
+    {
+
+        <TelerikTileLayout class="dark-tile-layout" Columns="12"
+                           ColumnWidth="100%"
+                           RowHeight="100%"
+                           Height="Auto"
+                           Reorderable="true"
+                           Resizable="true">
+
+            <TileLayoutItems>
+                <div  class="tiles-container">
+                    @foreach (var widget in WidgetInfo.Data)
+                    {
+                        @if (widget.WidgetInfo.WIDGETTYPE == 1)
+                        {
+                            <TileLayoutItem class="dark-tile-layout-card" ColSpan="3">
+                                <HeaderTemplate>
+                                    <h4 style="color:white">@widget.WidgetInfo.NAME</h4>
+                                </HeaderTemplate>
+                                <Content>
+                                    <SyncWidgetComponent WidgetInfo=@widget />
+                                </Content>
+                            </TileLayoutItem>
+                        }
+                        @if (widget.WidgetInfo.WIDGETTYPE == 2)
+                        {
+                            <TileLayoutItem class="dark-tile-layout-card" ColSpan="3">
+                                <HeaderTemplate>
+                                    <h4 style="color:white">@widget.WidgetInfo.NAME</h4>
+                                </HeaderTemplate>
+                                <Content>
+                                    <StatusWidget WidgetInfo=@widget />
+                                </Content>
+                            </TileLayoutItem>
+                        }
+                        <WidgetInfoModal WidgetInfo="widget"></WidgetInfoModal>
+
+                    }
+                </div>
+            </TileLayoutItems>
+        </TelerikTileLayout>
     }
-
-    .dark-tile-layout-card {
-        background-color: #343a40;
-        color: white;
-    }
-
-</style>
-@if (WidgetInfo.Data != null)
-{
-
-    <TelerikTileLayout class="dark-tile-layout" Columns="12"
-                       ColumnWidth="100%"
-                       RowHeight="100%"
-                       Height="Auto"
-                       Reorderable="true"
-                       Resizable="true">
-        <TileLayoutItems>
-            @foreach (var widget in WidgetInfo.Data)
-            {
-                @if (widget.WidgetInfo.WIDGETTYPE == 1)
-                {
-                    <TileLayoutItem class="dark-tile-layout-card"  ColSpan="3">
-                        <HeaderTemplate>
-                            <h4 style="color:white">@widget.WidgetInfo.NAME</h4>
-                        </HeaderTemplate>
-                        <Content>
-                            <SyncWidgetComponent WidgetInfo=@widget />
-                        </Content>
-                    </TileLayoutItem>
-                }
-                @if (widget.WidgetInfo.WIDGETTYPE == 2)
-                {
-                    <TileLayoutItem class="dark-tile-layout-card"  ColSpan="3">
-                        <HeaderTemplate>
-                            <h4 style="color:white">@widget.WidgetInfo.NAME</h4>
-                        </HeaderTemplate>
-                        <Content>
-                            <StatusWidget WidgetInfo=@widget />
-                        </Content>
-                    </TileLayoutItem>
-                }
-
-            }
-        </TileLayoutItems>
-    </TelerikTileLayout>
-
-}
+    <style>
+        .tiles-container {
+            position: relative;
+            z-index: 1;
+        }
+    </style>
 </AuthorizeView>
-
 @code {
 
 
     public ServiceResponse<List<ClientWidget>> WidgetInfo { get; set; } = new ServiceResponse<List<ClientWidget>>();
     public TelerikTileLayout TileLayoutInstance { get; set; }
     SyncWidgetComponent syncompRef { get; set; }
+
     protected override async Task OnInitializedAsync()
     {
         WidgetInfo = await WidgetService.GetWidgetsInfo();
 
     }
+
+
+
+
 
 
 }

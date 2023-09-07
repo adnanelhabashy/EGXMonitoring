@@ -11,14 +11,14 @@
 @using EGXMonitoring.Shared
 @using EGXMonitoring.Shared.DTOS
 @using EGXMonitoring.Client.Services.WidgetService
-@using EGXMonitoring.Client.Services.UsersService;
+@using EGXMonitoring.Client.Services.UsersService
 @using Newtonsoft.Json
 
 @using System.Threading
 @using System.Linq
 @using EGXMonitoring.Client.Services.AuthService
 
-@using Blazored.LocalStorage;
+@using Blazored.LocalStorage
 @using Microsoft.AspNetCore.Components.Authorization
 @using Microsoft.AspNetCore.WebUtilities
 @using Microsoft.AspNetCore.Authorization
@@ -30,9 +30,11 @@
 @using Telerik.Blazor.Components
 @using Telerik.Blazor.Components.Drawer
 @using Telerik.Blazor.Components.TileLayout
-
+@using Telerik.DataSource
 
 
 @inject IJSRuntime JSRuntime
 @inject NavigationManager NavigationManager
 @inject AuthenticationStateProvider _authStateProvider
+
+@namespace EGXMonitoring.Client

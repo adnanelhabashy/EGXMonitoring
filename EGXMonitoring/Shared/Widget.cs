@@ -24,5 +24,6 @@ namespace EGXMonitoring.Shared
         public decimal? CHECKTYPE { get; set; }
         public int? ALARMAFTER { get; set; }
         public DateTime? AFTERTIME { get; set; }
+        public string? DESCRIPTION { get; set; } = string.Empty;
     }
 }

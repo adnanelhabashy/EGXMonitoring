@@ -32,7 +32,4 @@ builder.Services.AddAuthorizationCore(options =>
     });
 });
 builder.Services.AddScoped<AuthenticationStateProvider, CustomAuthStateProvider>();
-
-
-
 await builder.Build().RunAsync();

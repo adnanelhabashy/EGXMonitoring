@@ -5,7 +5,8 @@
 @using System.Data
 
 
-<div class="card" id="Card">
+
+<div class="card" id="Card-@WidgetInfo.WidgetInfo.NAME">
     <div class="card-header border-transparent">
         <h3 class="card-title"><strong>Sync Widget</strong></h3>
 
@@ -13,8 +14,8 @@
             <button type="button" @onclick="ToggleFullScreen" class="btn btn-tool">
                 <i class="fa fa-fw fa-bars"></i>
             </button>
-@*             <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                <i class="fas fa-minus"></i>
+            @*             <button type="button" class="btn btn-tool" data-card-widget="collapse">
+            <i class="fas fa-minus"></i>
             </button> *@
             <button type="button" @onclick="RefreshWidget" class="btn btn-tool">
                 <i class="fa fa-fw fa-retweet"></i>
@@ -61,6 +62,12 @@
                                         ErrorTime[@group.Key] = DateTime.Now;
                                     }
                                     string warningLevel = ProcessWarning(GetErrortime(group.Key).ToString("hh:mm:ss tt"));
+                                    if (warningLevel == "blinking3-row")
+                                    {
+                                          //ShowToast(@group.Key, ErrorTime[@group.Key].ToString(), "out of sync value :" + lowestValue);
+
+                                        JSRuntime.InvokeVoidAsync("toast","Alert in" + WidgetInfo.WidgetInfo.NAME, @group.Key, "not in sync since :"+ErrorTime[@group.Key].ToString(), lowestValue);
+                                    }
                                     <tr class="@warningLevel" style="background-color:#423d3c;color:red">
                                         <td colspan="@table.Columns.Count" style="text-align: center;">@group.Key Not in sync <strong>@GetErrortime(@group.Key).ToString("hh:mm:ss tt")</strong></td>
                                     </tr>
@@ -118,9 +125,15 @@
     }
     <!-- /.card-body -->
     <div class="card-footer clearfix">
+        <button type="button" class="btn btn-info" data-toggle="modal" data-target="#@WidgetInfo.WidgetInfo.NAME">
+            Launch Widget Information
+        </button>
     </div>
     <!-- /.card-footer -->
 </div>
+
+@* <WidgetInfoModal WidgetInfo="WidgetInfo"></WidgetInfoModal>
+ *@
 
 
 <script>
@@ -148,6 +161,19 @@
             document.msExitFullscreen();
         }
     };
+
+    function toast(title, subtitle, body) {
+        const toastOptions = {
+            class: 'bg-danger',
+            title: title,
+            subtitle: subtitle,
+            body: body,
+            position: 'bottomLeft',
+            autohide: true,
+            delay: 10000,
+        };
+        $(document).Toasts('create', toastOptions);
+    }
 </script>
 
 @code {
@@ -186,6 +212,7 @@
         }
         setWarningLevels(WidgetInfo.WidgetInfo.ALARMAFTER);
         isLoading = false;
+
     }
 
     private async void RefreshWidget(object state)
@@ -196,6 +223,7 @@
         errors = message.Split(";").ToList();
         // Call the StateHasChanged method to notify the component to re-render
         await InvokeAsync(StateHasChanged);
+        
     }
 
     private async Task ToggleFullScreen()
@@ -204,12 +232,18 @@
 
         if (isFullScreen)
         {
-            await JSRuntime.InvokeVoidAsync("enterFullScreen", "Card");
+            await JSRuntime.InvokeVoidAsync("enterFullScreen", "Card-" + WidgetInfo.WidgetInfo.NAME);
         }
         else
         {
             await JSRuntime.InvokeVoidAsync("exitFullScreen");
         }
+    }
+
+    private async Task ShowToast(string group,string time,string value)
+    {
+        await JSRuntime.InvokeVoidAsync("Alert in"+WidgetInfo.WidgetInfo.NAME, group, time, value);
+
     }
 
 
@@ -262,13 +296,6 @@
             return "blinking3-row";
         }
     }
-
-    public void Refresh()
-    {
-
-    }
-
-
 
 
 }

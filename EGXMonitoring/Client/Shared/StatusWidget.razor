@@ -6,7 +6,8 @@
 
 
 
-<div class="card-@WidgetInfo.WidgetInfo.NAME">
+
+<div class="card-@WidgetInfo.WidgetInfo.NAME" id="Card-@WidgetInfo.WidgetInfo.NAME">
     <div class="card-header border-transparent">
         <h3 class="card-title"><strong>Status Widget</strong></h3>
 
@@ -14,8 +15,8 @@
             <button type="button" @onclick="ToggleFullScreen" class="btn btn-tool">
                 <i class="fa fa-fw fa-bars"></i>
             </button>
-@*             <button type="button" class="btn btn-tool" data-card-widget="collapse">
-                <i class="fas fa-minus"></i>
+            @*             <button type="button" class="btn btn-tool" data-card-widget="collapse">
+            <i class="fas fa-minus"></i>
             </button> *@
             <button type="button" @onclick="RefreshWidget" class="btn btn-tool">
                 <i class="fa fa-fw fa-retweet"></i>
@@ -23,62 +24,96 @@
             <div class="btn btn-tool">@DateTime.Now.ToString("hh:mm:ss tt")</div>
         </div>
     </div>
-    <!-- /.card-header -->
-    <div class="card-body p-0">
-        <div class="table-responsive">
-            <table class="table m-0">
-                <thead>
-                    <tr>
-                        @foreach (var column in table.Columns)
-                        {
-                            <th>@column.ToString()</th>
-                        }
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (DataRow row in table.Rows)
-                    {
+
+    @if (isLoading)
+    {
+        <div class="loading-animation">
+            <div class="spinner-border" role="status">
+                <span class="sr-only">Loading...</span>
+            </div>
+        </div>
+    }
+    else
+    {
+        <!-- /.card-header -->
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table m-0">
+                    <thead>
                         <tr>
-                            @foreach (DataColumn column in table.Columns)
+                            @foreach (var column in table.Columns)
                             {
-                                if(column.ColumnName == WidgetInfo.WidgetInfo.VALUECOLMN)
+                                <th>@column.ToString()</th>
+                            }
+                            <th>Error Time</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (DataRow row in table.Rows)
+                        {
+                            string warningLevel = string.Empty;
+                            if (@row[WidgetInfo.WidgetInfo.VALUECOLMN].ToString() == "-1")
+                            {
+                                if (!SearchErrorTime(WidgetInfo.WidgetInfo.GROUPCOLUMN))
                                 {
-                                    if (@row[column].ToString() == "-1")
+                                    ErrorTime[WidgetInfo.WidgetInfo.GROUPCOLUMN] = DateTime.Now;
+                                }
+                                warningLevel = ProcessWarning(GetErrortime(WidgetInfo.WidgetInfo.GROUPCOLUMN).ToString("hh:mm:ss tt"));
+
+                            }
+                            <tr class="@warningLevel">
+                                @foreach (DataColumn column in table.Columns)
+                                {
+                                   
+                                    if (column.ColumnName == WidgetInfo.WidgetInfo.VALUECOLMN)
                                     {
-                                        <td><span class="badge badge-danger">Error</span></td>
-                                    }
-                                    else if (@row[column].ToString() == "1" || @row[column].ToString() == "0")
-                                    {
-                                        <td><span class="badge badge-success">Success</span></td>
+                                        if (@row[column].ToString() == "-1")
+                                        {
+                                        
+                                            <td><span class="badge badge-danger">Error</span></td>
+                                           
+                                        }
+                                        else if (@row[column].ToString() == "1" || @row[column].ToString() == "0")
+                                        {
+                                            <td><span class="badge badge-success">Success</span></td>
+                                         
+                                        }
+                                        else
+                                        {
+                                            <td><span class="badge badge-info">@row[column]</span></td>
+                                          
+                                        }
                                     }
                                     else
                                     {
-                                        <td><span class="badge badge-info">@row[column]</span></td>
+                                        <td>@row[column]</td>
                                     }
-                                }
-                                else
-                                {
-                                    <td>@row[column]</td>
-                                }
-                                
-                            }
-                        </tr>
-                    }
-                 
 
-                </tbody>
-            </table>
+                                }
+                                <td>-</td>
+                            </tr>
+                        }
+
+
+                    </tbody>
+                </table>
+            </div>
+            <!-- /.table-responsive -->
         </div>
-        <!-- /.table-responsive -->
-    </div>
-    <!-- /.card-body -->
-    <div class="card-footer clearfix">
-        @*   <a href="javascript:void(0)" class="btn btn-sm btn-info float-left">Place New Order</a>
+        <!-- /.card-body -->
+        <div class="card-footer clearfix">
+            @*   <a href="javascript:void(0)" class="btn btn-sm btn-info float-left">Place New Order</a>
         <a href="javascript:void(0)" class="btn btn-sm btn-secondary float-right">View All Orders</a> *@
-    </div>
+            <button type="button" class="btn btn-info" data-toggle="modal" data-target="#@WidgetInfo.WidgetInfo.NAME">
+                Launch Widget Information
+            </button>
+        </div>
+    }
     <!-- /.card-footer -->
 </div>
-<script>
+
+@* <WidgetInfoModal WidgetInfo="WidgetInfo"></WidgetInfoModal>
+ *@<script>
     window.enterFullScreen = function (elementId) {
         const element = document.getElementById(elementId);
         if (element.requestFullscreen) {
@@ -116,6 +151,13 @@
     private bool isLoading = true;
     private bool isPlaying;
 
+    Dictionary<string, DateTime> ErrorTime = new Dictionary<string, DateTime>();
+
+    public int? Level1 { get; set; }
+    public int? Level2 { get; set; }
+    public int? Level3 { get; set; }
+
+
     protected override async Task OnInitializedAsync()
     {
         isLoading = true;
@@ -130,6 +172,7 @@
             timer = new Timer(RefreshWidget, null, TimeSpan.Zero, TimeSpan.FromSeconds(refreshIntervalInSeconds));
 
         }
+        setWarningLevels(WidgetInfo.WidgetInfo.ALARMAFTER);
 
         isLoading = false;
     }
@@ -140,7 +183,7 @@
 
         if (isFullScreen)
         {
-            await JSRuntime.InvokeVoidAsync("enterFullScreen", "card-"+WidgetInfo.WidgetInfo.NAME);
+            await JSRuntime.InvokeVoidAsync("enterFullScreen", "Card-" + WidgetInfo.WidgetInfo.NAME);
         }
         else
         {
@@ -156,5 +199,56 @@
 
         // Call the StateHasChanged method to notify the component to re-render
         await InvokeAsync(StateHasChanged);
+    }
+
+
+    private bool SearchErrorTime(string groupname)
+    {
+        bool containsKey = ErrorTime.ContainsKey(groupname);
+        return containsKey;
+    }
+
+    private DateTime GetErrortime(string groupname)
+    {
+        return ErrorTime[groupname];
+    }
+
+    private void RemoveErrorTime(string groupname)
+    {
+        bool removed = ErrorTime.Remove(groupname);
+    }
+
+    private void setWarningLevels(int? minutes)
+    {
+        int? milseconds = minutes * 60 * 1000;
+
+        Level1 = milseconds / 3;
+        Level2 = Level1 * 2;
+        Level3 = Level1 * 3;
+    }
+
+    private string ProcessWarning(string time)
+    {
+        DateTime currentTime = DateTime.Now;
+        DateTime parsedTime = DateTime.ParseExact(time, "hh:mm:ss tt", CultureInfo.InvariantCulture);
+        TimeSpan timeDifference = parsedTime - currentTime;
+        long timeDifferenceMilliseconds = (long)timeDifference.TotalMilliseconds * -1;
+
+        if (timeDifferenceMilliseconds >= 0 && timeDifferenceMilliseconds <= Level1)
+        {
+            return "blinking1-row";
+        }
+        else if (timeDifferenceMilliseconds >= Level1 && timeDifferenceMilliseconds <= Level2)
+        {
+            return "blinking2-row";
+        }
+        else if (timeDifferenceMilliseconds >= Level2 && timeDifferenceMilliseconds <= Level3)
+        {
+            return "blinking3-row";
+        }
+        else
+        {
+            return "blinking3-row";
+        }
     }
 }
