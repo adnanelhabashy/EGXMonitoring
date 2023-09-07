@@ -51,19 +51,63 @@
                     <tbody>
                         @foreach (DataRow row in table.Rows)
                         {
+                           
                             string warningLevel = string.Empty;
+                            string errorTime = string.Empty;
                             if (@row[WidgetInfo.WidgetInfo.VALUECOLMN].ToString() == "-1")
                             {
-                                if (!SearchErrorTime(WidgetInfo.WidgetInfo.GROUPCOLUMN))
-                                {
-                                    ErrorTime[WidgetInfo.WidgetInfo.GROUPCOLUMN] = DateTime.Now;
-                                }
-                                warningLevel = ProcessWarning(GetErrortime(WidgetInfo.WidgetInfo.GROUPCOLUMN).ToString("hh:mm:ss tt"));
-                                if (warningLevel == "blinking3-row")
-                                {
-                                    //ShowToast(@group.Key, ErrorTime[@group.Key].ToString(), "out of sync value :" + lowestValue);
+                                
 
-                                    JSRuntime.InvokeVoidAsync("toast", "Alert in" + WidgetInfo.WidgetInfo.NAME, row[WidgetInfo.WidgetInfo.GROUPCOLUMN], "not in sync since :" + ErrorTime[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString(), "Has Error");
+                                if(WidgetInfo.WidgetInfo.CHECKTYPE == 1)
+                                {
+                                    
+                                    if (!SearchErrorTime(row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString()))
+                                    {
+                                        ErrorTime[row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString()] = DateTime.Now;
+                                        errorTime = DateTime.Now.ToString("hh:mm:ss tt");
+                                    }
+                                    else
+                                    {
+                                        errorTime = ErrorTime[row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString()].ToString("hh:mm:ss tt");
+                                    }
+                                    warningLevel = ProcessWarning(GetErrortime(row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString()).ToString("hh:mm:ss tt"));
+
+                                    if (warningLevel == "blinking3-row")
+                                    {
+                                        JSRuntime.InvokeVoidAsync("toast", "Alert in" + WidgetInfo.WidgetInfo.NAME, row[WidgetInfo.WidgetInfo.GROUPCOLUMN], "Failing since :" + ErrorTime[row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString()].ToString(), "Has Error");
+                                    }
+                                }
+                                else if (WidgetInfo.WidgetInfo.CHECKTYPE == 2)
+                                {
+
+                                    DateTime currentDateTime = DateTime.Now;
+                                    if (WidgetInfo.WidgetInfo.AFTERTIME.HasValue && currentDateTime.TimeOfDay > WidgetInfo.WidgetInfo.AFTERTIME.Value.TimeOfDay)
+                                    {
+                                      
+                                        if (!SearchErrorTime(row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString()))
+                                        {
+                                            ErrorTime[row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString()] = DateTime.Now;
+                                            errorTime = DateTime.Now.ToString("hh:mm:ss tt");
+                                        }
+                                        else
+                                        {
+                                            errorTime = ErrorTime[row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString()].ToString("hh:mm:ss tt");
+                                        }
+                                        warningLevel = ProcessWarning(GetErrortime(row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString()).ToString("hh:mm:ss tt"));
+
+                                        if (warningLevel == "blinking3-row")
+                                        {
+                                            JSRuntime.InvokeVoidAsync("toast", "Alert in" + WidgetInfo.WidgetInfo.NAME, row[WidgetInfo.WidgetInfo.GROUPCOLUMN], "Failing since :" + ErrorTime[row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString()].ToString(), "Has Error");
+                                        }
+                                    }
+                                }
+
+                            }
+                            else
+                            {
+                                if (SearchErrorTime(row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString()))
+                                {
+                                    RemoveErrorTime(row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString());
                                 }
                             }
                             <tr class="@warningLevel">
@@ -95,7 +139,16 @@
                                     }
 
                                 }
-                                <td>-</td>
+                                <td>@if (!string.IsNullOrEmpty(errorTime))
+                                    {
+                                        
+                                        <p>@errorTime</p>
+                                    }
+                                    else
+                                    {
+                                        <p>-</p>
+                                    }
+                                </td>
                             </tr>
                         }
 
@@ -168,6 +221,8 @@
     private bool isFullScreen = false;
     private bool isLoading = true;
     private bool isPlaying;
+
+    bool RowHasError = false;
 
     Dictionary<string, DateTime> ErrorTime = new Dictionary<string, DateTime>();
 
