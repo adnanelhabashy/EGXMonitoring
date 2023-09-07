@@ -59,7 +59,12 @@
                                     ErrorTime[WidgetInfo.WidgetInfo.GROUPCOLUMN] = DateTime.Now;
                                 }
                                 warningLevel = ProcessWarning(GetErrortime(WidgetInfo.WidgetInfo.GROUPCOLUMN).ToString("hh:mm:ss tt"));
+                                if (warningLevel == "blinking3-row")
+                                {
+                                    //ShowToast(@group.Key, ErrorTime[@group.Key].ToString(), "out of sync value :" + lowestValue);
 
+                                    JSRuntime.InvokeVoidAsync("toast", "Alert in" + WidgetInfo.WidgetInfo.NAME, row[WidgetInfo.WidgetInfo.GROUPCOLUMN], "not in sync since :" + ErrorTime[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString(), "Has Error");
+                                }
                             }
                             <tr class="@warningLevel">
                                 @foreach (DataColumn column in table.Columns)
@@ -104,7 +109,7 @@
         <div class="card-footer clearfix">
             @*   <a href="javascript:void(0)" class="btn btn-sm btn-info float-left">Place New Order</a>
         <a href="javascript:void(0)" class="btn btn-sm btn-secondary float-right">View All Orders</a> *@
-            <button type="button" class="btn btn-info" data-toggle="modal" data-target="#@WidgetInfo.WidgetInfo.NAME">
+            <button type="button" class="btn btn-info" data-toggle="modal" data-target="#@WidgetInfo.WidgetInfo.NAME.Replace(" ", "")">
                 Launch Widget Information
             </button>
         </div>
@@ -138,6 +143,19 @@
             document.msExitFullscreen();
         }
     };
+
+       function toast(title, subtitle, body) {
+           const toastOptions = {
+               class: 'bg-danger',
+               title: title,
+               subtitle: subtitle,
+               body: body,
+               position: 'bottomLeft',
+               autohide: true,
+               delay: 10000,
+           };
+           $(document).Toasts('create', toastOptions);
+       }
 </script>
 @code {
     [Parameter]
