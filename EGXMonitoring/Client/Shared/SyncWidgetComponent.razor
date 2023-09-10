@@ -61,15 +61,32 @@
                                     {
                                         ErrorTime[@group.Key] = DateTime.Now;
                                     }
-                                    string warningLevel = ProcessWarning(GetErrortime(group.Key).ToString("hh:mm:ss tt"));
+                                    string warningLevel = string.Empty;
+                                    if (WidgetInfo.WidgetInfo.CHECKTYPE == 1)
+                                    {
+                                        warningLevel = ProcessWarning(GetErrortime(group.Key).ToString("hh:mm:ss tt"), group.Key);
+                                    }
+                                    if (WidgetInfo.WidgetInfo.CHECKTYPE == 2)
+                                    {
+                                        DateTime currentDateTime = DateTime.Now;
+                                        if (WidgetInfo.WidgetInfo.AFTERTIME.HasValue && currentDateTime.TimeOfDay > WidgetInfo.WidgetInfo.AFTERTIME.Value.TimeOfDay)
+                                        {
+                                            warningLevel = ProcessWarning(GetErrortime(group.Key).ToString("hh:mm:ss tt"), group.Key);
+                                        }
+                                    }
                                     if (warningLevel == "blinking3-row")
                                     {
-                                          //ShowToast(@group.Key, ErrorTime[@group.Key].ToString(), "out of sync value :" + lowestValue);
-
-                                        JSRuntime.InvokeVoidAsync("toast","Alert in" + WidgetInfo.WidgetInfo.NAME, @group.Key, "not in sync since :"+ErrorTime[@group.Key].ToString(), lowestValue);
+                                        JSRuntime.InvokeVoidAsync("toast", "Alert in" + WidgetInfo.WidgetInfo.NAME, @group.Key, "not in sync since :" + ErrorTime[@group.Key].ToString(), lowestValue);
                                     }
                                     <tr class="@warningLevel" style="background-color:#423d3c;color:red">
-                                        <td colspan="@table.Columns.Count" style="text-align: center;">@group.Key Not in sync <strong>@GetErrortime(@group.Key).ToString("hh:mm:ss tt")</strong></td>
+                                        <td colspan="@table.Columns.Count" style="text-align: center;">
+                                            @group.Key Not in sync since <strong>@GetErrortime(@group.Key).ToString("hh:mm:ss tt")</strong>
+                                            <label style="margin: 20px;">
+                                                <input type="checkbox" @onclick="()=> IgnoreWarning(group.Key)" checked="@IsWarningIgnored(group.Key)"> Avoid Check
+                                            </label>
+
+                                        </td>
+
                                     </tr>
                                     @foreach (DataRow row in group)
                                     {
@@ -88,9 +105,15 @@
                                     {
                                         RemoveErrorTime(@group.Key);
                                     }
-
                                     <tr>
-                                        <td colspan="@table.Columns.Count">@group.Key</td>
+                                        <td colspan="@table.Columns.Count">
+                                            @group.Key
+                                            <label style="margin: 20px;">
+                                                <input type="checkbox" @onclick="()=> IgnoreWarning(group.Key)" checked="@IsWarningIgnored(group.Key)"> Avoid Check
+                                            </label>
+
+
+                                        </td>
                                     </tr>
                                     @foreach (DataRow row in group)
                                     {
@@ -102,7 +125,6 @@
                                         </tr>
                                     }
                                 }
-
                             }
                         }
                         else
@@ -125,7 +147,7 @@
     }
     <!-- /.card-body -->
     <div class="card-footer clearfix">
-        <button type="button" class="btn btn-info" data-toggle="modal" data-target="#@WidgetInfo.WidgetInfo.NAME.Replace(" ", "")">
+        <button type="button" class="btn btn-info" data-toggle="modal" data-target="#@WidgetInfo.WidgetInfo.NAME">
             Launch Widget Information
         </button>
     </div>
@@ -193,6 +215,8 @@
     public int? Level3 { get; set; }
 
     Dictionary<string, DateTime> ErrorTime = new Dictionary<string, DateTime>();
+    Dictionary<string, bool> IgnoredWarnings = new Dictionary<string, bool>();
+
 
     private bool isPlaying;
 
@@ -223,7 +247,22 @@
         errors = message.Split(";").ToList();
         // Call the StateHasChanged method to notify the component to re-render
         await InvokeAsync(StateHasChanged);
-        
+
+    }
+
+    private bool IsWarningIgnored(string groupname)
+    {
+        bool containsKey = IgnoredWarnings.ContainsKey(groupname);
+        if (!containsKey)
+        {
+            IgnoredWarnings[groupname] = false; // Set the initial value to false
+        }
+        return IgnoredWarnings[groupname];
+    }
+
+    private void IgnoreWarning(string groupname)
+    {
+        IgnoredWarnings[groupname] = !IgnoredWarnings[groupname];
     }
 
     private async Task ToggleFullScreen()
@@ -240,9 +279,9 @@
         }
     }
 
-    private async Task ShowToast(string group,string time,string value)
+    private async Task ShowToast(string group, string time, string value)
     {
-        await JSRuntime.InvokeVoidAsync("Alert in"+WidgetInfo.WidgetInfo.NAME, group, time, value);
+        await JSRuntime.InvokeVoidAsync("Alert in" + WidgetInfo.WidgetInfo.NAME, group, time, value);
 
     }
 
@@ -272,13 +311,17 @@
         Level3 = Level1 * 3;
     }
 
-    private string ProcessWarning(string time)
+    private string ProcessWarning(string time, string groupname)
     {
         DateTime currentTime = DateTime.Now;
         DateTime parsedTime = DateTime.ParseExact(time, "hh:mm:ss tt", CultureInfo.InvariantCulture);
         TimeSpan timeDifference = parsedTime - currentTime;
         long timeDifferenceMilliseconds = (long)timeDifference.TotalMilliseconds * -1;
 
+        if (IsWarningIgnored(groupname))
+        {
+            return ""; // Return empty string to disable warning styling
+        }
         if (timeDifferenceMilliseconds >= 0 && timeDifferenceMilliseconds <= Level1)
         {
             return "blinking1-row";

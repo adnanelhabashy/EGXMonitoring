@@ -46,6 +46,7 @@
                                 <th>@column.ToString()</th>
                             }
                             <th>Error Time</th>
+                            <th>Avoid Check</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -70,7 +71,7 @@
                                     {
                                         errorTime = ErrorTime[row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString()].ToString("hh:mm:ss tt");
                                     }
-                                    warningLevel = ProcessWarning(GetErrortime(row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString()).ToString("hh:mm:ss tt"));
+                                    warningLevel = ProcessWarning(GetErrortime(row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString()).ToString("hh:mm:ss tt"),row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString());
 
                                     if (warningLevel == "blinking3-row")
                                     {
@@ -93,7 +94,7 @@
                                         {
                                             errorTime = ErrorTime[row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString()].ToString("hh:mm:ss tt");
                                         }
-                                        warningLevel = ProcessWarning(GetErrortime(row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString()).ToString("hh:mm:ss tt"));
+                                        warningLevel = ProcessWarning(GetErrortime(row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString()).ToString("hh:mm:ss tt"), row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString());
 
                                         if (warningLevel == "blinking3-row")
                                         {
@@ -130,7 +131,6 @@
                                         else
                                         {
                                             <td><span class="badge badge-info">@row[column]</span></td>
-                                          
                                         }
                                     }
                                     else
@@ -149,6 +149,11 @@
                                         <p>-</p>
                                     }
                                 </td>
+                                <td>
+                                    <input type="checkbox" @onclick="()=> IgnoreWarning(row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString())" checked="@IsWarningIgnored(row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString())" />
+                                </td>
+
+
                             </tr>
                         }
 
@@ -225,6 +230,8 @@
     bool RowHasError = false;
 
     Dictionary<string, DateTime> ErrorTime = new Dictionary<string, DateTime>();
+    Dictionary<string, bool> IgnoredWarnings = new Dictionary<string, bool>();
+
 
     public int? Level1 { get; set; }
     public int? Level2 { get; set; }
@@ -264,6 +271,22 @@
         }
     }
 
+
+    private bool IsWarningIgnored(string groupname)
+    {
+        bool containsKey = IgnoredWarnings.ContainsKey(groupname);
+        if (!containsKey)
+        {
+            IgnoredWarnings[groupname] = false; // Set the initial value to false
+        }
+        return IgnoredWarnings[groupname];
+    }
+
+    private void IgnoreWarning(string groupname)
+    {
+        IgnoredWarnings[groupname] = !IgnoredWarnings[groupname];
+    }
+
     private async void RefreshWidget(object state)
     {
         var Data = await WidgetService.GetWidgetData(WidgetInfo);
@@ -300,13 +323,16 @@
         Level3 = Level1 * 3;
     }
 
-    private string ProcessWarning(string time)
+    private string ProcessWarning(string time,string groupname)
     {
         DateTime currentTime = DateTime.Now;
         DateTime parsedTime = DateTime.ParseExact(time, "hh:mm:ss tt", CultureInfo.InvariantCulture);
         TimeSpan timeDifference = parsedTime - currentTime;
         long timeDifferenceMilliseconds = (long)timeDifference.TotalMilliseconds * -1;
-
+        if (IsWarningIgnored(groupname))
+        {
+            return ""; // Return empty string to disable warning styling
+        }
         if (timeDifferenceMilliseconds >= 0 && timeDifferenceMilliseconds <= Level1)
         {
             return "blinking1-row";

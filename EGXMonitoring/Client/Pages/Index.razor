@@ -33,7 +33,7 @@
                         {
                             <TileLayoutItem class="dark-tile-layout-card" ColSpan="3">
                                 <HeaderTemplate>
-                                    <h4 style="color:white">@(widget.WidgetInfo.CHECKTYPE == 1?widget.WidgetInfo.NAME: widget.WidgetInfo.NAME +" Suspended until "+ widget.WidgetInfo.AFTERTIME.Value.ToString("hh:mm tt"))</h4>
+                                    <h4 style="color:white">@(widget.WidgetInfo.CHECKTYPE == 1?widget.WidgetInfo.NAME: widget.WidgetInfo.NAME +" Starts Working at :"+ widget.WidgetInfo.AFTERTIME.Value.ToString("hh:mm tt"))</h4>
                                 </HeaderTemplate>
                                 <Content>
                                     <SyncWidgetComponent WidgetInfo=@widget />
@@ -44,7 +44,7 @@
                         {
                             <TileLayoutItem class="dark-tile-layout-card" ColSpan="3">
                                 <HeaderTemplate>
-                                    <h4 style="color:white">@(widget.WidgetInfo.CHECKTYPE == 1 ? widget.WidgetInfo.NAME : widget.WidgetInfo.NAME + " Suspended until " + widget.WidgetInfo.AFTERTIME.Value.ToString("hh:mm tt"))</h4>
+                                    <h4 style="color:white">@(widget.WidgetInfo.CHECKTYPE == 1 ? widget.WidgetInfo.NAME : widget.WidgetInfo.NAME +" Starts Working at :" + widget.WidgetInfo.AFTERTIME.Value.ToString("hh:mm tt"))</h4>
                                 </HeaderTemplate>
                                 <Content>
                                     <StatusWidget WidgetInfo=@widget />
