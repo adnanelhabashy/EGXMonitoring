@@ -1,4 +1,5 @@
-﻿using EGXMonitoring.Shared.DTOS;
+﻿using EGXMonitoring.Shared;
+using EGXMonitoring.Shared.DTOS;
 using System.Collections.Generic;
 using System.Data;
 using System.Net.Http.Json;
@@ -55,6 +56,25 @@ namespace EGXMonitoring.Client.Services.WidgetService
             return result;
         }
 
-    
+        public async Task<ServiceResponse<ClientWidget>> AddWidget(ClientWidget widget)
+        {
+            var result = await _http.PostAsJsonAsync("api/Widgets/addwidget", widget);
+            var data = await result.Content.ReadFromJsonAsync<ServiceResponse<ClientWidget>>();
+            return data;
+        }
+
+        public async Task<ServiceResponse<ClientWidget>> UpdateWidget(ClientWidget widget)
+        {
+            var result = await _http.PostAsJsonAsync("api/Widgets/updatewidget", widget);
+            var data = await result.Content.ReadFromJsonAsync<ServiceResponse<ClientWidget>>();
+            return data;
+        }
+
+        public async Task<ServiceResponse<ClientWidget>> DeleteWidget(ClientWidget widget)
+        {
+            var result = await _http.PostAsJsonAsync("api/Widgets/deletewidget", widget);
+            var data = await result.Content.ReadFromJsonAsync<ServiceResponse<ClientWidget>>();
+            return data;
+        }
     }
 }

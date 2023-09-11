@@ -25,5 +25,8 @@ namespace EGXMonitoring.Shared
         public int? ALARMAFTER { get; set; }
         public DateTime? AFTERTIME { get; set; }
         public string? DESCRIPTION { get; set; } = string.Empty;
+        public DateTime? ENDTIME { get; set; }
+
+        
     }
 }

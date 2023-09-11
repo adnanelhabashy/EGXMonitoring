@@ -1,0 +1,10 @@
+﻿.loading-animation {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%; /* Set the height to 100% to fill the widget container */
+}
+
+    .loading-animation .spinner-border {
+        color: #3c8dbc; /* Set the color to match your theme */
+    }

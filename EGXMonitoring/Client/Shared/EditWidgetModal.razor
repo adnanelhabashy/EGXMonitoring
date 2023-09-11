@@ -1,0 +1,44 @@
+﻿<div class="modal fade" id="editModal_@WidgetInfo.WidgetInfo.ID" tabindex="-1" role="dialog" aria-labelledby="editModalLabel_@WidgetInfo.WidgetInfo.ID" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editModalLabel_@WidgetInfo.WidgetInfo.ID">Edit Widget @WidgetInfo.WidgetInfo.NAME</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <EditForm Model="WidgetInfo" OnValidSubmit="HandleSave">
+
+                <div class="modal-body">
+     
+
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Save changes</button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
+@code {
+    [Parameter]
+    public ClientWidget WidgetInfo { get; set; }
+    private bool showTimeInputs = false;
+    protected override async Task OnInitializedAsync()
+    {
+
+    }
+
+    private async Task HandleSave()
+    {
+
+    }
+
+    private void HandleCheckTypeChange(ChangeEventArgs e)
+    {
+        int selectedValue = Convert.ToInt32(e.Value);
+        showTimeInputs = (selectedValue == 2);
+        StateHasChanged();
+    }
+}

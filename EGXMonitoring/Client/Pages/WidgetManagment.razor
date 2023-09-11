@@ -1,9 +1,123 @@
 ﻿@page "/widgetmanagment"
+@inject IWidgetService WidgetService
+
+
 
 <PageTitle>Widget Managment</PageTitle>
 <h3>Widget Managment</h3>
+<br />
+<br />
+<div style="text-align: center;">
+    <h4>Sync Widgets</h4>
+</div>
+<br />
+@if (isLoading)
+{
+    <div style="text-align: center;" class="loading-animation">
+
+        <div class="spinner-border" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+}
+else
+{
+    @for (int row = 0; row < rowCount; row++)
+    {
+        <div class="row">
+            @for (int col = 0; col < itemsPerRow; col++)
+            {
+                int index = row * itemsPerRow + col;
+                if (index < syncWidgets.Count)
+                {
+                    var widget = syncWidgets[index];
+                    <div class="col-lg-2 col-6">
+                        <!-- small card -->
+                        <div class="small-box bg-info">
+                            <div class="inner">
+                                <h3>@widget.WidgetInfo.NAME</h3>
+                                <p>@widget.WidgetInfo.DESCRIPTION</p>
+                            </div>
+                            <div class="icon">
+                                <i class="fas fa-chart-pie"></i>
+                            </div>
+                            <a  class="small-box-footer" data-toggle="modal" data-target="#editModal_@widget.WidgetInfo.ID">
+                                Edit <i class="fas fa-arrow-circle-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <EditWidgetModal WidgetInfo="widget"></EditWidgetModal>
+                }
+            }
+        </div>
+    }
+}
+
+<hr class="divider" />
+<div style="text-align: center;">
+    <h4>Status Widgets</h4>
+</div>
+<br />
+@if (isLoading)
+{
+    <div style="text-align: center;" class="loading-animation">
+
+        <div class="spinner-border" role="status">
+            <span class="sr-only">Loading...</span>
+        </div>
+    </div>
+}
+else
+{
+    @for (int row = 0; row < rowCount; row++)
+    {
+        <div class="row">
+            @for (int col = 0; col < itemsPerRow; col++)
+            {
+                int index = row * itemsPerRow + col;
+                if (index < statusWidgets.Count)
+                {
+                    var widget = statusWidgets[index];
+                    <div class="col-lg-2 col-6">
+                        <!-- small card -->
+                        <div class="small-box bg-info">
+                            <div class="inner">
+                                <h3>@widget.WidgetInfo.NAME</h3>
+                                <p>@widget.WidgetInfo.DESCRIPTION</p>
+                            </div>
+                            <div class="icon">
+                                <i class="fas fa-chart-pie"></i>
+                            </div>
+                            <a class="small-box-footer" data-toggle="modal" data-target="#editModal_@widget.WidgetInfo.ID">
+                                Edit <i class="fas fa-arrow-circle-right"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <EditWidgetModal WidgetInfo="widget"></EditWidgetModal>
+                }
+            }
+        </div>
+    }
+}
 
 
 @code {
+    public ServiceResponse<List<ClientWidget>> WidgetInfo { get; set; } = new ServiceResponse<List<ClientWidget>>();
 
+    int itemsPerRow = 6; // Number of items in each row
+    int rowCount = 0;
+    List<ClientWidget> syncWidgets = new List<ClientWidget>();
+    List<ClientWidget> statusWidgets = new List<ClientWidget>();
+    private bool isLoading = true;
+    protected override async Task OnInitializedAsync()
+    {
+        isLoading = true;
+        WidgetInfo = await WidgetService.GetWidgetsInfo();
+        rowCount = (int)Math.Ceiling((double)WidgetInfo.Data.Count / itemsPerRow);
+
+        syncWidgets = WidgetInfo.Data.Where(w => w.WidgetInfo.WIDGETTYPE == 1).ToList();
+        statusWidgets = WidgetInfo.Data.Where(w => w.WidgetInfo.WIDGETTYPE == 2).ToList();
+        isLoading = false;
+    }
 }
+

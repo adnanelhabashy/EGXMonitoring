@@ -22,34 +22,7 @@ namespace EGXMonitoring.Server.Services.WidgetService
         }
 
 
-        public async Task<ServiceResponse<List<ClientWidget>>> GetWidgetsInfo()
-        {
-            try
-            {
-                var widgetsInfo = await _context.Widgets.ToListAsync();
-                var result = new ServiceResponse<List<ClientWidget>>();
-                result.Data = new List<ClientWidget>();
-                foreach (var widgetInfo in widgetsInfo)
-                {
-                    result.Data.Add(new ClientWidget()
-                    {
-                        WidgetInfo = widgetInfo,
-                    });
-                }
-
-                return result;
-            }
-            catch (Exception ex)
-            {
-                return new ServiceResponse<List<ClientWidget>>()
-                {
-                    Data = null,
-                    Message = ex.Message,
-                    Success = false
-                };
-            }
-
-        }
+      
         public ServiceResponse<List<Dictionary<string, object>>> GetWidgetData(Widget widgetInfo)
         {
             if (widgetInfo != null)
@@ -209,6 +182,105 @@ namespace EGXMonitoring.Server.Services.WidgetService
             else
             {
                 return null;
+            }
+        }
+
+        public async Task<ServiceResponse<List<ClientWidget>>> GetWidgetsInfo()
+        {
+            try
+            {
+                var widgetsInfo = await _context.Widgets.ToListAsync();
+                var result = new ServiceResponse<List<ClientWidget>>();
+                result.Data = new List<ClientWidget>();
+                foreach (var widgetInfo in widgetsInfo)
+                {
+                    result.Data.Add(new ClientWidget()
+                    {
+                        WidgetInfo = widgetInfo,
+                    });
+                }
+
+                return result;
+            }
+            catch (Exception ex)
+            {
+                return new ServiceResponse<List<ClientWidget>>()
+                {
+                    Data = null,
+                    Message = ex.Message,
+                    Success = false
+                };
+            }
+        }
+
+        public async Task<ServiceResponse<ClientWidget>> UpdateWidget(ClientWidget widget)
+        {
+            try
+            {
+                _context.Widgets.Update(widget.WidgetInfo);
+                await _context.SaveChangesAsync();
+                return new ServiceResponse<ClientWidget>() { 
+                Data = widget,
+                Message = "Widget Updated",
+                Success = true
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ServiceResponse<ClientWidget>()
+                {
+                    Data = null,
+                    Message = ex.Message,
+                    Success = false
+                };
+            }
+        }
+
+        public async Task<ServiceResponse<ClientWidget>> AddWidget(ClientWidget widget)
+        {
+            try
+            {
+                await _context.Widgets.AddAsync(widget.WidgetInfo);
+                await _context.SaveChangesAsync();
+                return new ServiceResponse<ClientWidget>()
+                {
+                    Data = widget,
+                    Message = "Widget Added",
+                    Success = true
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ServiceResponse<ClientWidget>()
+                {
+                    Data = null,
+                    Message = ex.Message,
+                    Success = false
+                };
+            }
+        }
+        
+        public async Task<ServiceResponse<ClientWidget>> RemoveWidget(ClientWidget widget)
+        {
+            try
+            {
+                 _context.Widgets.Remove(widget.WidgetInfo);
+                await _context.SaveChangesAsync();
+                return new ServiceResponse<ClientWidget>()
+                {
+                    Data = widget,
+                    Message = "Widget Removed",
+                    Success = true
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ServiceResponse<ClientWidget>()
+                {
+                    Data = null,
+                    Message = ex.Message,
+                    Success = false
+                };
             }
         }
     }

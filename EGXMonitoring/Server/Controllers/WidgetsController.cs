@@ -42,6 +42,27 @@ namespace EGXMonitoring.Server.Controllers
             return Ok(data);
         }
 
+        [HttpPost("addwidget")]
+        public async Task<ActionResult<ServiceResponse<User>>> AddWidget(ClientWidget widget)
+        {
+            var response = await _widgetService.AddWidget(widget);
+            return Ok(response);
+        }
+
+        [HttpPost("updatewidget")]
+        public async Task<ActionResult<ServiceResponse<User>>> UpdateWidget(ClientWidget widget)
+        {
+            var response = await _widgetService.UpdateWidget(widget);
+            return Ok(response);
+        }
+
+        [HttpPost("deletewidget")]
+        public async Task<ActionResult<ServiceResponse<User>>> DeleteWidget(ClientWidget widget)
+        {
+            var response = await _widgetService.RemoveWidget(widget);
+            return Ok(response);
+        }
+
 
     }
 }

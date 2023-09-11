@@ -69,7 +69,7 @@
                                     if (WidgetInfo.WidgetInfo.CHECKTYPE == 2)
                                     {
                                         DateTime currentDateTime = DateTime.Now;
-                                        if (WidgetInfo.WidgetInfo.AFTERTIME.HasValue && currentDateTime.TimeOfDay > WidgetInfo.WidgetInfo.AFTERTIME.Value.TimeOfDay)
+                                        if (WidgetInfo.WidgetInfo.AFTERTIME.HasValue && currentDateTime.TimeOfDay > WidgetInfo.WidgetInfo.AFTERTIME.Value.TimeOfDay && currentDateTime.TimeOfDay < WidgetInfo.WidgetInfo.ENDTIME.Value.TimeOfDay)
                                         {
                                             warningLevel = ProcessWarning(GetErrortime(group.Key).ToString("hh:mm:ss tt"), group.Key);
                                         }

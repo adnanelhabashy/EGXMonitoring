@@ -1,5 +1,7 @@
-﻿<CascadingAuthenticationState>
-    <TelerikRootComponent >
+﻿
+
+<CascadingAuthenticationState>
+    <TelerikRootComponent>
         <Router AppAssembly="@typeof(App).Assembly">
             <Found Context="routeData">
                 <AuthorizeRouteView RouteData="@routeData" DefaultLayout="@typeof(MainLayout)">
@@ -14,7 +16,7 @@
                         }
                     </NotAuthorized>
                     <Authorizing>
-                        <div class="p-2 m-2 h5" >Authorizing User ...</div>
+                        <div class="p-2 m-2 h5">Authorizing User ...</div>
                     </Authorizing>
                 </AuthorizeRouteView>
                 <FocusOnNavigate RouteData="@routeData" Selector="h1" />
