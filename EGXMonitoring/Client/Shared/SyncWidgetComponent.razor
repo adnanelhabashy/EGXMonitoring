@@ -281,7 +281,7 @@
 
     private async Task ShowToast(string group, string time, string value)
     {
-        await JSRuntime.InvokeVoidAsync("Alert in" + WidgetInfo.WidgetInfo.NAME, group, time, value);
+        await JSRuntime.InvokeVoidAsync("toast","Alert in" + WidgetInfo.WidgetInfo.NAME, group, time, value);
 
     }
 
