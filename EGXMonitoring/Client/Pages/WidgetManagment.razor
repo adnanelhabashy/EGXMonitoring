@@ -8,10 +8,15 @@
 <h3>Widget Managment</h3>
 <br />
 <br />
+<button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#AddWidget">
+    <span class="oi oi-plus"></span> Add Widget
+</button>
+<br />
 <div style="text-align: center;">
     <h4>Sync Widgets</h4>
 </div>
 <br />
+
 @if (isLoading)
 {
     <div style="text-align: center;" class="loading-animation">
@@ -116,10 +121,8 @@ else
     }
 
 }
-<button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#newWidget">
-    <span class="oi oi-plus"></span> Add
-</button>
 
+<AddWidgetModal></AddWidgetModal>
 
 @code {
     public ServiceResponse<List<ClientWidget>> WidgetInfo { get; set; } = new ServiceResponse<List<ClientWidget>>();

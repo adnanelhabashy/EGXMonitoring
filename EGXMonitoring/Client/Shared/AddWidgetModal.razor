@@ -1,5 +1,184 @@
-﻿<h3>AddWidgetModal</h3>
+﻿@inject IWidgetService WidgetService
+@inject IJSRuntime JSRuntime
+@using Microsoft.JSInterop
+<div class="modal fade" id="AddWidget" tabindex="-1" role="dialog" aria-labelledby="Add Widget" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">New Widget</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <EditForm Model="WidgetInfo" OnValidSubmit="AddWidget">
+
+                <div class="modal-body">
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">Name</span>
+                        </div>
+                        <InputText type="text" @bind-Value="WidgetInfo.WidgetInfo.NAME" class="form-control" placeholder="" />
+                        <ValidationMessage For="@(() => WidgetInfo.WidgetInfo.NAME)"></ValidationMessage>
+                    </div>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">Refresh Interval (in seconds)</span>
+                        </div>
+                        <InputNumber type="text" @bind-Value="WidgetInfo.WidgetInfo.REFRESHINTERVAL" class="form-control" placeholder="" />
+                        <ValidationMessage For="@(() => WidgetInfo.WidgetInfo.REFRESHINTERVAL)"></ValidationMessage>
+                    </div>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">Alarm After (in minutes)</span>
+                        </div>
+                        <InputNumber type="text" @bind-Value="WidgetInfo.WidgetInfo.ALARMAFTER" class="form-control" placeholder="" />
+                        <ValidationMessage For="@(() => WidgetInfo.WidgetInfo.ALARMAFTER)"></ValidationMessage>
+                    </div>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">SQL Command</span>
+                        </div>
+                        <InputText type="text" @bind-Value="WidgetInfo.WidgetInfo.SQLCOMMAND" class="form-control" placeholder="" />
+                        <ValidationMessage For="@(() => WidgetInfo.WidgetInfo.SQLCOMMAND)"></ValidationMessage>
+                    </div>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">Connection String</span>
+                        </div>
+                        <InputTextArea type="text" @bind-Value="WidgetInfo.WidgetInfo.CONNCETIONSTRING" class="form-control" placeholder="" />
+                        <ValidationMessage For="@(() => WidgetInfo.WidgetInfo.CONNCETIONSTRING)"></ValidationMessage>
+                    </div>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">Value Column</span>
+                        </div>
+                        <InputText type="text" @bind-Value="WidgetInfo.WidgetInfo.VALUECOLMN" class="form-control" placeholder="" />
+                        <ValidationMessage For="@(() => WidgetInfo.WidgetInfo.VALUECOLMN)"></ValidationMessage>
+                    </div>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">Group Column</span>
+                        </div>
+                        <InputText type="text" @bind-Value="WidgetInfo.WidgetInfo.GROUPCOLUMN" class="form-control" placeholder="" />
+                        <ValidationMessage For="@(() => WidgetInfo.WidgetInfo.GROUPCOLUMN)"></ValidationMessage>
+                    </div>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">Description</span>
+                        </div>
+                        <InputTextArea type="text" @bind-Value="WidgetInfo.WidgetInfo.DESCRIPTION" class="form-control" placeholder="" />
+                        <ValidationMessage For="@(() => WidgetInfo.WidgetInfo.DESCRIPTION)"></ValidationMessage>
+                    </div>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">Description</span>
+                        </div>
+                        <InputSelect type="text" @bind-Value="WidgetInfo.WidgetInfo.WIDGETTYPE" class="form-control" placeholder="">
+                            <option value="1">Sync Widget</option>
+                            <option value="2">Status Widget</option>
+                        </InputSelect>
+                        <ValidationMessage For="@(() => WidgetInfo.WidgetInfo.DESCRIPTION)"></ValidationMessage>
+                    </div>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">Check Type</span>
+                        </div>
+                        <InputSelect type="text" @bind-Value="WidgetInfo.WidgetInfo.CHECKTYPE" class="form-control" @onchange="HandleCheckTypeChange" placeholder="">
+                            <option value="1">Instant</option>
+                            <option value="2">Time Interval</option>
+                        </InputSelect>
+                        <ValidationMessage For="@(() => WidgetInfo.WidgetInfo.CHECKTYPE)"></ValidationMessage>
+                    </div>
+                    @if (showTimeInputs || WidgetInfo.WidgetInfo.CHECKTYPE == 2)
+                    {
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">Time Start</span>
+                            </div>
+                            <InputDate Type="InputDateType.Time" @bind-Value="@WidgetInfo.WidgetInfo.AFTERTIME" />
+                            <ValidationMessage For="@(() => WidgetInfo.WidgetInfo.AFTERTIME)"></ValidationMessage>
+                        </div>
+                        <div class="input-group mb-3">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text">Time End</span>
+                            </div>
+                            <InputDate Type="InputDateType.Time" @bind-Value="@WidgetInfo.WidgetInfo.ENDTIME" />
+                            <ValidationMessage For="@(() => WidgetInfo.WidgetInfo.ENDTIME)"></ValidationMessage>
+                        </div>
+                    }
+                </div>
+                <div class="modal-footer">
+                 
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal"> Close </button>
+                    <button type="submit" class="btn btn-primary"> Add Widget </button>
+                </div>
+            </EditForm>
+        </div>
+    </div>
+</div>
+<script>
+
+
+    function toastDanger(title, subtitle, body) {
+        const toastOptions = {
+            class: 'bg-danger',
+            title: title,
+            subtitle: subtitle,
+            body: body,
+            position: 'bottomLeft',
+            autohide: true,
+            delay: 10000,
+        };
+        $(document).Toasts('create', toastOptions);
+    }
+    function toastSuccess(title, subtitle, body) {
+        const toastOptions = {
+            class: 'bg-success',
+            title: title,
+            subtitle: subtitle,
+            body: body,
+            position: 'bottomLeft',
+            autohide: true,
+            delay: 10000,
+        };
+        $(document).Toasts('create', toastOptions);
+    }
+</script>
 
 @code {
+    public ClientWidget? WidgetInfo { get; set; }
+    private bool showTimeInputs = false;
+    ServiceResponse<ClientWidget> response = new ServiceResponse<ClientWidget>();
+    protected override async Task OnInitializedAsync()
+    {
+        WidgetInfo = new ClientWidget();
+        WidgetInfo.WidgetInfo = new Widget();
+        WidgetInfo.WidgetInfo.CHECKTYPE = 1;
+        WidgetInfo.WidgetInfo.WIDGETTYPE = 1;
+    }
+    private void HandleCheckTypeChange(ChangeEventArgs e)
+    {
+        int selectedValue = Convert.ToInt32(e.Value);
+        showTimeInputs = (selectedValue == 2);
+        StateHasChanged();
+    }
 
+    private async Task AddWidget()
+    {
+        if (WidgetInfo != null)
+        {
+            response = await WidgetService.AddWidget(WidgetInfo);
+
+            if (response.Success)
+            {
+                await JSRuntime.InvokeVoidAsync("toastSuccess", WidgetInfo.WidgetInfo.NAME, "Add Status", response.Message);
+               
+            }
+            else
+            {
+                await JSRuntime.InvokeVoidAsync("toastDanger", WidgetInfo.WidgetInfo.NAME, "Add Status", response.Message);
+
+            }
+        }
+    }
 }
