@@ -1,6 +1,7 @@
 ﻿@page "/widgetmanagment"
 @inject IWidgetService WidgetService
-
+@inject NavigationManager NavigationManager
+@inject IJSRuntime JSRuntime
 
 
 <PageTitle>Widget Managment</PageTitle>
@@ -22,35 +23,43 @@
 }
 else
 {
-    @for (int row = 0; row < rowCount; row++)
+    if (syncWidgets.Count > 0)
     {
-        <div class="row">
-            @for (int col = 0; col < itemsPerRow; col++)
-            {
-                int index = row * itemsPerRow + col;
-                if (index < syncWidgets.Count)
+        @for (int row = 0; row < rowCount; row++)
+        {
+            <div class="row">
+                @for (int col = 0; col < itemsPerRow; col++)
                 {
-                    var widget = syncWidgets[index];
-                    <div class="col-lg-2 col-6">
-                        <!-- small card -->
-                        <div class="small-box bg-info">
-                            <div class="inner">
-                                <h3>@widget.WidgetInfo.NAME</h3>
-                                <p>@widget.WidgetInfo.DESCRIPTION</p>
+                    int index = row * itemsPerRow + col;
+                    if (index < syncWidgets.Count)
+                    {
+                        var widget = syncWidgets[index];
+                        <div class="col-lg-2 col-6">
+                            <!-- small card -->
+                            <div class="small-box bg-info">
+                                <div class="inner">
+                                    <h3>@widget.WidgetInfo.NAME</h3>
+                                    <p>@widget.WidgetInfo.DESCRIPTION</p>
+                                </div>
+                                <div class="icon">
+                                    <i class="fas fa-chart-pie"></i>
+                                </div>
+                                <a class="small-box-footer" data-toggle="modal" data-target="#editModal_@widget.WidgetInfo.ID">
+                                    Edit <i class="fas fa-arrow-circle-right"></i>
+                                </a>
                             </div>
-                            <div class="icon">
-                                <i class="fas fa-chart-pie"></i>
-                            </div>
-                            <a  class="small-box-footer" data-toggle="modal" data-target="#editModal_@widget.WidgetInfo.ID">
-                                Edit <i class="fas fa-arrow-circle-right"></i>
-                            </a>
                         </div>
-                    </div>
-                    <EditWidgetModal WidgetInfo="widget"></EditWidgetModal>
+                        <EditWidgetModal StateChanged="OnStateChanged" WidgetInfo="widget"></EditWidgetModal>
+                    }
                 }
-            }
-        </div>
+            </div>
+        }
     }
+    else
+    {
+        
+    }
+
 }
 
 <hr class="divider" />
@@ -69,36 +78,47 @@ else
 }
 else
 {
-    @for (int row = 0; row < rowCount; row++)
+    if(statusWidgets.Count > 0 )
     {
-        <div class="row">
-            @for (int col = 0; col < itemsPerRow; col++)
-            {
-                int index = row * itemsPerRow + col;
-                if (index < statusWidgets.Count)
+        @for (int row = 0; row < rowCount; row++)
+        {
+            <div class="row">
+                @for (int col = 0; col < itemsPerRow; col++)
                 {
-                    var widget = statusWidgets[index];
-                    <div class="col-lg-2 col-6">
-                        <!-- small card -->
-                        <div class="small-box bg-info">
-                            <div class="inner">
-                                <h3>@widget.WidgetInfo.NAME</h3>
-                                <p>@widget.WidgetInfo.DESCRIPTION</p>
+                    int index = row * itemsPerRow + col;
+                    if (index < statusWidgets.Count)
+                    {
+                        var widget = statusWidgets[index];
+                        <div class="col-lg-2 col-6">
+                            <!-- small card -->
+                            <div class="small-box bg-info">
+                                <div class="inner">
+                                    <h3>@widget.WidgetInfo.NAME</h3>
+                                    <p>@widget.WidgetInfo.DESCRIPTION</p>
+                                </div>
+                                <div class="icon">
+                                    <i class="fas fa-chart-pie"></i>
+                                </div>
+                                <a class="small-box-footer" data-toggle="modal" data-target="#editModal_@widget.WidgetInfo.ID">
+                                    Edit <i class="fas fa-arrow-circle-right"></i>
+                                </a>
                             </div>
-                            <div class="icon">
-                                <i class="fas fa-chart-pie"></i>
-                            </div>
-                            <a class="small-box-footer" data-toggle="modal" data-target="#editModal_@widget.WidgetInfo.ID">
-                                Edit <i class="fas fa-arrow-circle-right"></i>
-                            </a>
                         </div>
-                    </div>
-                    <EditWidgetModal WidgetInfo="widget"></EditWidgetModal>
+                        <EditWidgetModal StateChanged="OnStateChanged" WidgetInfo="widget"></EditWidgetModal>
+                    }
                 }
-            }
-        </div>
+            </div>
+        }
     }
+    else
+    {
+        
+    }
+
 }
+<button type="button" class="btn btn-primary btn-lg" data-toggle="modal" data-target="#newWidget">
+    <span class="oi oi-plus"></span> Add
+</button>
 
 
 @code {
@@ -118,6 +138,11 @@ else
         syncWidgets = WidgetInfo.Data.Where(w => w.WidgetInfo.WIDGETTYPE == 1).ToList();
         statusWidgets = WidgetInfo.Data.Where(w => w.WidgetInfo.WIDGETTYPE == 2).ToList();
         isLoading = false;
+    }
+
+    private void OnStateChanged(bool newState)
+    {
+         StateHasChanged();
     }
 }
 

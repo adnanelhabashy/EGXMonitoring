@@ -108,6 +108,9 @@
                     }
                 </div>
                 <div class="modal-footer">
+                    <div class="float-left">
+                        <button type="button" class="btn btn-danger" @onclick="DeleteWidget">Delete Widget</button>
+                     </div>
                     <button type="button" class="btn btn-secondary" data-dismiss="modal"> Close </button>
                     <button type="submit" class="btn btn-primary"> Save changes </button>
                 </div>
@@ -153,6 +156,11 @@
     {
 
     }
+    [Parameter]
+    public bool State { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> StateChanged { get; set; }
 
     private async Task HandleSave()
     {
@@ -163,7 +171,28 @@
             if (response.Success)
             {
                 await JSRuntime.InvokeVoidAsync("toastSuccess", WidgetInfo.WidgetInfo.NAME, "Update Status", response.Message);
+                await ChangeParentState();
+            }
+            else
+            {
+                await JSRuntime.InvokeVoidAsync("toastDanger", WidgetInfo.WidgetInfo.NAME, "Update Status", response.Message);
 
+            }
+        }
+    }
+
+
+
+    private async Task DeleteWidget()
+    {
+        if (WidgetInfo != null)
+        {
+            response = await WidgetService.DeleteWidget(WidgetInfo);
+
+            if (response.Success)
+            {
+                await JSRuntime.InvokeVoidAsync("toastSuccess", WidgetInfo.WidgetInfo.NAME, "Update Status", response.Message);
+                await ChangeParentState();
             }
             else
             {
@@ -178,5 +207,11 @@
         int selectedValue = Convert.ToInt32(e.Value);
         showTimeInputs = (selectedValue == 2);
         StateHasChanged();
+    }
+
+    private async Task ChangeParentState()
+    {
+        State = !State;
+        await StateChanged.InvokeAsync(State);
     }
 }
