@@ -1,5 +1,6 @@
 ﻿@page "/"
 @inject IWidgetService WidgetService
+@inject IJSRuntime jsRuntime
 @attribute [Authorize]
 <link rel="stylesheet" href="plugins/toastr/toastr.min.css">
 <AuthorizeView>
@@ -57,6 +58,7 @@
                 </div>
             </TileLayoutItems>
         </TelerikTileLayout>
+       
     }
     <style>
         .tiles-container {
@@ -64,18 +66,36 @@
             z-index: 1;
         }
     </style>
+    <audio id="Alert" src="/sounds/Alert.wav" loop></audio>
+    <script>
+        window.setAlert = function () {
+            var Alert = document.getElementById("Alert");
+            Alert.play();
+        };
+
+        window.stopAlert = function () {
+            var Alert = document.getElementById("Alert");
+            Alert.pause();
+            Alert.currentTime = 0;
+        };
+
+        window.isAlertOn = function () {
+            var Alert = document.getElementById("Alert");
+            return !Alert.paused;
+        };
+    </script>
 </AuthorizeView>
 @code {
 
 
     public ServiceResponse<List<ClientWidget>> WidgetInfo { get; set; } = new ServiceResponse<List<ClientWidget>>();
-    public TelerikTileLayout TileLayoutInstance { get; set; }
-    SyncWidgetComponent syncompRef { get; set; }
+
 
     protected override async Task OnInitializedAsync()
     {
         WidgetInfo = await WidgetService.GetWidgetsInfo();
-
+        //await jsRuntime.InvokeVoidAsync("setAlert");
+        //bool isPlaying = await jsRuntime.InvokeAsync<bool>("isAlertOn");
     }
 
 
