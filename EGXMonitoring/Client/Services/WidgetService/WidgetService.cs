@@ -26,8 +26,9 @@ namespace EGXMonitoring.Client.Services.WidgetService
             var data =  await result.Content.ReadFromJsonAsync<ServiceResponse<List<Dictionary<string, object>>>>();
 
             return new ServiceResponse<DataTable>() { 
-            Data = ManipulateData(data.Data),
-            Message = data.Message
+            Data = data.Success? ManipulateData(data.Data):null,
+            Message = data.Message,
+            Success = data.Success
             };
 
         }

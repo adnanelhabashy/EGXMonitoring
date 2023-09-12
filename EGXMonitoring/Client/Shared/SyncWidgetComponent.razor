@@ -36,112 +36,124 @@
     else
     {
         <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table m-0">
-                    <thead>
-                        <tr>
-                            @foreach (var column in table.Columns)
-                            {
-                                <th>@column.ToString()</th>
-                            }
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @if (!string.IsNullOrEmpty(WidgetInfo.WidgetInfo.GROUPCOLUMN))
-                        {
-                            var groupedData = table.AsEnumerable()
-                            .GroupBy(row => row.Field<string>(WidgetInfo.WidgetInfo.GROUPCOLUMN));
-
-                            @foreach (var group in groupedData)
-                            {
-                                if (errors.Contains(@group.Key))
+            @if (Data.Success)
+            {
+                <div class="table-responsive">
+                    <table class="table m-0">
+                        <thead>
+                            <tr>
+                                @foreach (var column in table.Columns)
                                 {
-                                    var lowestValue = group.Min(row => row.Field<string>(WidgetInfo.WidgetInfo.VALUECOLMN));
-                                    if (!SearchErrorTime(@group.Key))
+                                    <th>@column.ToString()</th>
+                                }
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (!string.IsNullOrEmpty(WidgetInfo.WidgetInfo.GROUPCOLUMN))
+                            {
+                                var groupedData = table.AsEnumerable()
+                                .GroupBy(row => row.Field<string>(WidgetInfo.WidgetInfo.GROUPCOLUMN));
+
+                                @foreach (var group in groupedData)
+                                {
+                                    if (errors.Contains(@group.Key))
                                     {
-                                        ErrorTime[@group.Key] = DateTime.Now;
-                                    }
-                                    string warningLevel = string.Empty;
-                                    if (WidgetInfo.WidgetInfo.CHECKTYPE == 1)
-                                    {
-                                        warningLevel = ProcessWarning(GetErrortime(group.Key).ToString("hh:mm:ss tt"), group.Key);
-                                    }
-                                    if (WidgetInfo.WidgetInfo.CHECKTYPE == 2)
-                                    {
-                                        DateTime currentDateTime = DateTime.Now;
-                                        if (WidgetInfo.WidgetInfo.AFTERTIME.HasValue && currentDateTime.TimeOfDay > WidgetInfo.WidgetInfo.AFTERTIME.Value.TimeOfDay && currentDateTime.TimeOfDay < WidgetInfo.WidgetInfo.ENDTIME.Value.TimeOfDay)
+                                        var lowestValue = group.Min(row => row.Field<string>(WidgetInfo.WidgetInfo.VALUECOLMN));
+                                        if (!SearchErrorTime(@group.Key))
+                                        {
+                                            ErrorTime[@group.Key] = DateTime.Now;
+                                        }
+                                        string warningLevel = string.Empty;
+                                        if (WidgetInfo.WidgetInfo.CHECKTYPE == 1)
                                         {
                                             warningLevel = ProcessWarning(GetErrortime(group.Key).ToString("hh:mm:ss tt"), group.Key);
                                         }
-                                    }
-                                    if (warningLevel == "blinking3-row")
-                                    {
-                                        JSRuntime.InvokeVoidAsync("toast", "Alert in" + WidgetInfo.WidgetInfo.NAME, @group.Key, "not in sync since :" + ErrorTime[@group.Key].ToString(), lowestValue);
-                                    }
-                                    <tr class="@warningLevel" style="background-color:#423d3c;color:red">
-                                        <td colspan="@table.Columns.Count" style="text-align: center;">
-                                            @group.Key Not in sync since <strong>@GetErrortime(@group.Key).ToString("hh:mm:ss tt")</strong>
-                                            <label style="margin: 20px;">
-                                                <input type="checkbox" @onclick="()=> IgnoreWarning(group.Key)" checked="@IsWarningIgnored(group.Key)"> Avoid Check
-                                            </label>
-
-                                        </td>
-
-                                    </tr>
-                                    @foreach (DataRow row in group)
-                                    {
-                                        var columnValue = row.Field<string>(WidgetInfo.WidgetInfo.VALUECOLMN);
-                                        <tr class="red-tint" style="@(columnValue == lowestValue ? "background-color:black;color:red" : "")">
-                                            @foreach (DataColumn column in table.Columns)
+                                        if (WidgetInfo.WidgetInfo.CHECKTYPE == 2)
+                                        {
+                                            DateTime currentDateTime = DateTime.Now;
+                                            if (WidgetInfo.WidgetInfo.AFTERTIME.HasValue && currentDateTime.TimeOfDay > WidgetInfo.WidgetInfo.AFTERTIME.Value.TimeOfDay && currentDateTime.TimeOfDay < WidgetInfo.WidgetInfo.ENDTIME.Value.TimeOfDay)
                                             {
-                                                <td>@row[column]</td>
+                                                warningLevel = ProcessWarning(GetErrortime(group.Key).ToString("hh:mm:ss tt"), group.Key);
                                             }
+                                        }
+                                        if (warningLevel == "blinking3-row")
+                                        {
+                                            JSRuntime.InvokeVoidAsync("toast", "Alert in" + WidgetInfo.WidgetInfo.NAME, @group.Key, "not in sync since :" + ErrorTime[@group.Key].ToString(), lowestValue);
+                                        }
+                                        <tr class="@warningLevel" style="background-color:#423d3c;color:red">
+                                            <td colspan="@table.Columns.Count" style="text-align: center;">
+                                                @group.Key Not in sync since <strong>@GetErrortime(@group.Key).ToString("hh:mm:ss tt")</strong>
+                                                <label style="margin: 20px;">
+                                                    <input type="checkbox" @onclick="()=> IgnoreWarning(group.Key)" checked="@IsWarningIgnored(group.Key)"> Avoid Check
+                                                </label>
+
+                                            </td>
+
                                         </tr>
+                                        @foreach (DataRow row in group)
+                                        {
+                                            var columnValue = row.Field<string>(WidgetInfo.WidgetInfo.VALUECOLMN);
+                                            <tr class="red-tint" style="@(columnValue == lowestValue ? "background-color:black;color:red" : "")">
+                                                @foreach (DataColumn column in table.Columns)
+                                                {
+                                                    <td>@row[column]</td>
+                                                }
+                                            </tr>
+                                        }
                                     }
-                                }
-                                else
-                                {
-                                    if (SearchErrorTime(@group.Key))
+                                    else
                                     {
-                                        RemoveErrorTime(@group.Key);
-                                    }
-                                    <tr>
-                                        <td colspan="@table.Columns.Count">
-                                            @group.Key
-                                            <label style="margin: 20px;">
-                                                <input type="checkbox" @onclick="()=> IgnoreWarning(group.Key)" checked="@IsWarningIgnored(group.Key)"> Avoid Check
-                                            </label>
+                                        if (SearchErrorTime(@group.Key))
+                                        {
+                                            RemoveErrorTime(@group.Key);
+                                        }
+                                        <tr>
+                                            <td colspan="@table.Columns.Count">
+                                                @group.Key
+                                                <label style="margin: 20px;">
+                                                    <input type="checkbox" @onclick="()=> IgnoreWarning(group.Key)" checked="@IsWarningIgnored(group.Key)"> Avoid Check
+                                                </label>
 
 
-                                        </td>
-                                    </tr>
-                                    @foreach (DataRow row in group)
-                                    {
-                                        <tr style="background-color:grey">
-                                            @foreach (DataColumn column in table.Columns)
-                                            {
-                                                <td>@row[column]</td>
-                                            }
+                                            </td>
                                         </tr>
+                                        @foreach (DataRow row in group)
+                                        {
+                                            <tr style="background-color:grey">
+                                                @foreach (DataColumn column in table.Columns)
+                                                {
+                                                    <td>@row[column]</td>
+                                                }
+                                            </tr>
+                                        }
                                     }
                                 }
                             }
-                        }
-                        else
-                        {
-                            @foreach (DataRow row in table.Rows)
+                            else
                             {
-                                <tr>
-                                    @foreach (DataColumn column in table.Columns)
-                                    {
-                                        <td>@row[column]</td>
-                                    }
-                                </tr>
+                                @foreach (DataRow row in table.Rows)
+                                {
+                                    <tr>
+                                        @foreach (DataColumn column in table.Columns)
+                                        {
+                                            <td>@row[column]</td>
+                                        }
+                                    </tr>
+                                }
                             }
-                        }
-                    </tbody>
-                </table>
-            </div>
+                        </tbody>
+                    </table>
+                </div>
+            }
+            else
+            {
+                <div class="card-body p-0">
+                    <div class="text-container blinking3-row" style="min-height: 200px;">
+                        <span style=" font-size: 18px;" class="centered-text"><strong>The following error occured : </strong>@Data.Message</span>
+                    </div>
+                </div>
+            }
+
             <!-- /.table-responsive -->
         </div>
     }
@@ -217,23 +229,22 @@
     Dictionary<string, DateTime> ErrorTime = new Dictionary<string, DateTime>();
     Dictionary<string, bool> IgnoredWarnings = new Dictionary<string, bool>();
 
+    ServiceResponse<DataTable> Data = new ServiceResponse<DataTable>();
 
     private bool isPlaying;
 
     protected override async Task OnInitializedAsync()
     {
         isLoading = true;
-        var Data = await WidgetService.GetWidgetData(WidgetInfo);
-        table = Data.Data;
-        message = Data.Message;
-        errors = message.Split(";").ToList();
-        if (table.Rows.Count > 0)
-        {
-            //ColumnNames = Rows[0].Keys.ToList();
-            refreshIntervalInSeconds = WidgetInfo.WidgetInfo.REFRESHINTERVAL;
-            timer = new Timer(RefreshWidget, null, TimeSpan.Zero, TimeSpan.FromSeconds(refreshIntervalInSeconds));
 
-        }
+        Data = await WidgetService.GetWidgetData(WidgetInfo);
+        table = Data.Success ? Data.Data : null;
+        message = Data.Success ? Data.Message : "";
+        errors = Data.Success ? message.Split(";").ToList() : new List<string>();
+
+        //ColumnNames = Rows[0].Keys.ToList();
+        refreshIntervalInSeconds = WidgetInfo.WidgetInfo.REFRESHINTERVAL;
+        timer = new Timer(RefreshWidget, null, TimeSpan.Zero, TimeSpan.FromSeconds(refreshIntervalInSeconds));
         setWarningLevels(WidgetInfo.WidgetInfo.ALARMAFTER);
         isLoading = false;
 
@@ -241,10 +252,11 @@
 
     private async void RefreshWidget(object state)
     {
-        var Data = await WidgetService.GetWidgetData(WidgetInfo);
-        table = Data.Data;
-        message = Data.Message;
-        errors = message.Split(";").ToList();
+
+        Data = await WidgetService.GetWidgetData(WidgetInfo);
+        table = Data.Success ? Data.Data : null;
+        message = Data.Success ? Data.Message : "";
+        errors = Data.Success ? message.Split(";").ToList() : new List<string>();
         // Call the StateHasChanged method to notify the component to re-render
         await InvokeAsync(StateHasChanged);
 
@@ -281,7 +293,7 @@
 
     private async Task ShowToast(string group, string time, string value)
     {
-        await JSRuntime.InvokeVoidAsync("toast","Alert in" + WidgetInfo.WidgetInfo.NAME, group, time, value);
+        await JSRuntime.InvokeVoidAsync("toast", "Alert in" + WidgetInfo.WidgetInfo.NAME, group, time, value);
 
     }
 

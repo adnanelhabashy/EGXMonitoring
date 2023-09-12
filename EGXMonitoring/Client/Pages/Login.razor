@@ -22,6 +22,7 @@
         <DataAnnotationsValidator></DataAnnotationsValidator>
         <div class="input-group mb-3">
             <InputText id="Username" @bind-Value="User.Username" class="form-control"></InputText>
+            <br />
             <ValidationMessage For="@(() => User.Username)"></ValidationMessage>
             <div class="input-group-append">
                 <div class="input-group-text">
@@ -31,6 +32,7 @@
         </div>
         <div class="input-group mb-3">
             <InputText id="password" @bind-Value="User.Password" class="form-control" type="password"></InputText>
+            <br/>
             <ValidationMessage For="@(() => User.Password)"></ValidationMessage>
             <div class="input-group-append">
                 <div class="input-group-text">
@@ -51,7 +53,7 @@
             <div class="col-4">
                 <button type="submit" class="btn btn-primary btn-block">Login</button>
             </div>
-            <ValidationSummary></ValidationSummary>
+           
             <!-- /.col -->
         </div>
     </EditForm>

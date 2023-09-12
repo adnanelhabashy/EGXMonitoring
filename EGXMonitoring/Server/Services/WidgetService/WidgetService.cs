@@ -8,6 +8,8 @@ using Oracle.ManagedDataAccess.Client;
 using System.Data;
 using System.Linq;
 using System.Reflection.Metadata.Ecma335;
+using System.Security.Cryptography;
+using System.Text;
 using System.Text.Json.Nodes;
 
 namespace EGXMonitoring.Server.Services.WidgetService
@@ -15,19 +17,19 @@ namespace EGXMonitoring.Server.Services.WidgetService
     public class WidgetService : IWidgetService
     {
         private readonly DataContext _context;
+        private byte[] key;
+        private byte[] iv;
 
         public WidgetService(DataContext context)
         {
             _context = context;
         }
 
-
-      
-        public ServiceResponse<List<Dictionary<string, object>>> GetWidgetData(Widget widgetInfo)
+        public ServiceResponse<List<Dictionary<string, object>>> GetWidgetData(ClientWidget widgetInfo)
         {
             if (widgetInfo != null)
             {
-                string connectionString = widgetInfo.CONNCETIONSTRING;
+                string connectionString = widgetInfo.ConnectionString;
 
                 using (OracleConnection connection = new OracleConnection(connectionString))
                 {
@@ -36,17 +38,17 @@ namespace EGXMonitoring.Server.Services.WidgetService
                     {
                         connection.Open();
 
-                        using (OracleCommand command = new OracleCommand(widgetInfo.SQLCOMMAND, connection))
+                        using (OracleCommand command = new OracleCommand(widgetInfo.WidgetInfo.SQLCOMMAND, connection))
                         {
                             using (OracleDataReader reader = command.ExecuteReader())
                             {
 
                                 DataTable dataTable = new DataTable();
                                 dataTable.Load(reader);
-                                
-                                if (!string.IsNullOrEmpty(widgetInfo.GROUPCOLUMN))
+
+                                if (!string.IsNullOrEmpty(widgetInfo.WidgetInfo.GROUPCOLUMN))
                                 {
-                                    List<string> errorGroups = ValidateWidget(dataTable, widgetInfo);
+                                    List<string> errorGroups = ValidateWidget(dataTable, widgetInfo.WidgetInfo);
                                     if (errorGroups.Count > 0)
                                     {
                                         foreach (var group in errorGroups)
@@ -69,9 +71,9 @@ namespace EGXMonitoring.Server.Services.WidgetService
 
                                         // Add the column name and value to the dictionary
                                         row[columnName] = columnValue;
-                                       
+
                                     }
-                                 
+
                                     // Add the row to the list
                                     rows.Add(row);
                                 }
@@ -117,20 +119,20 @@ namespace EGXMonitoring.Server.Services.WidgetService
             return result;
         }
 
-        public ServiceResponse<List<Dictionary<string, object>>> GetStatusWidgetData(Widget widgetInfo)
+        public ServiceResponse<List<Dictionary<string, object>>> GetStatusWidgetData(ClientWidget widgetInfo)
         {
             if (widgetInfo != null)
             {
-                string connectionString = widgetInfo.CONNCETIONSTRING;
+                string connectionString = widgetInfo.ConnectionString;
 
                 using (OracleConnection connection = new OracleConnection(connectionString))
                 {
-                
+
                     try
                     {
                         connection.Open();
 
-                        using (OracleCommand command = new OracleCommand(widgetInfo.SQLCOMMAND, connection))
+                        using (OracleCommand command = new OracleCommand(widgetInfo.WidgetInfo.SQLCOMMAND, connection))
                         {
                             using (OracleDataReader reader = command.ExecuteReader())
                             {
@@ -138,7 +140,7 @@ namespace EGXMonitoring.Server.Services.WidgetService
                                 DataTable dataTable = new DataTable();
                                 dataTable.Load(reader);
 
-                               
+
                                 List<Dictionary<string, object>> rows = new List<Dictionary<string, object>>();
                                 foreach (DataRow dataRow in dataTable.Rows)
                                 {
@@ -197,6 +199,7 @@ namespace EGXMonitoring.Server.Services.WidgetService
                     result.Data.Add(new ClientWidget()
                     {
                         WidgetInfo = widgetInfo,
+                        ConnectionString = Decrypt(widgetInfo.CONNCETIONSTRINGHASH)
                     });
                 }
 
@@ -219,10 +222,11 @@ namespace EGXMonitoring.Server.Services.WidgetService
             {
                 _context.Widgets.Update(widget.WidgetInfo);
                 await _context.SaveChangesAsync();
-                return new ServiceResponse<ClientWidget>() { 
-                Data = widget,
-                Message = "Widget Updated",
-                Success = true
+                return new ServiceResponse<ClientWidget>()
+                {
+                    Data = widget,
+                    Message = "Widget Updated",
+                    Success = true
                 };
             }
             catch (Exception ex)
@@ -238,6 +242,7 @@ namespace EGXMonitoring.Server.Services.WidgetService
 
         public async Task<ServiceResponse<ClientWidget>> AddWidget(ClientWidget widget)
         {
+            widget.WidgetInfo.CONNCETIONSTRINGHASH = Encrypt(widget.ConnectionString);
             try
             {
                 await _context.Widgets.AddAsync(widget.WidgetInfo);
@@ -259,12 +264,12 @@ namespace EGXMonitoring.Server.Services.WidgetService
                 };
             }
         }
-        
+
         public async Task<ServiceResponse<ClientWidget>> RemoveWidget(ClientWidget widget)
         {
             try
             {
-                 _context.Widgets.Remove(widget.WidgetInfo);
+                _context.Widgets.Remove(widget.WidgetInfo);
                 await _context.SaveChangesAsync();
                 return new ServiceResponse<ClientWidget>()
                 {
@@ -281,6 +286,66 @@ namespace EGXMonitoring.Server.Services.WidgetService
                     Message = ex.Message,
                     Success = false
                 };
+            }
+        }
+
+
+
+
+        public string Encrypt(string text)
+        {
+            string key = "b14ba5848a4e4833rbye2ee2375a5918";
+
+            byte[] iv = new byte[16];
+            byte[] array;
+
+            using (Aes aes = Aes.Create())
+            {
+                aes.Key = Encoding.UTF8.GetBytes(key);
+                aes.IV = iv;
+
+                ICryptoTransform encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
+
+                using (MemoryStream memoryStream = new MemoryStream())
+                {
+                    using (CryptoStream cryptoStream = new CryptoStream((Stream)memoryStream, encryptor, CryptoStreamMode.Write))
+                    {
+                        using (StreamWriter streamWriter = new StreamWriter((Stream)cryptoStream))
+                        {
+                            streamWriter.Write(text);
+                        }
+
+                        array = memoryStream.ToArray();
+                    }
+                }
+            }
+
+            return Convert.ToBase64String(array).Replace('/', '*').Replace('+', ';');
+        }
+
+        public string Decrypt(string encryptedText)
+        {
+            string key = "b14ba5848a4e4833rbye2ee2375a5918";
+
+            byte[] iv = new byte[16];
+            byte[] buffer = Convert.FromBase64String(encryptedText.Replace('*', '/').Replace(';', '+'));
+
+            using (Aes aes = Aes.Create())
+            {
+                aes.Key = Encoding.UTF8.GetBytes(key);
+                aes.IV = iv;
+                ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
+
+                using (MemoryStream memoryStream = new MemoryStream(buffer))
+                {
+                    using (CryptoStream cryptoStream = new CryptoStream((Stream)memoryStream, decryptor, CryptoStreamMode.Read))
+                    {
+                        using (StreamReader streamReader = new StreamReader((Stream)cryptoStream))
+                        {
+                            return streamReader.ReadToEnd();
+                        }
+                    }
+                }
             }
         }
     }

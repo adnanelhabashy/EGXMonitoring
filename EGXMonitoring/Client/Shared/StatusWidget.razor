@@ -37,54 +37,33 @@
     {
         <!-- /.card-header -->
         <div class="card-body p-0">
-            <div class="table-responsive">
-                <table class="table m-0">
-                    <thead>
-                        <tr>
-                            @foreach (var column in table.Columns)
-                            {
-                                <th>@column.ToString()</th>
-                            }
-                            <th>Error Time</th>
-                            <th>Avoid Check</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @foreach (DataRow row in table.Rows)
-                        {
-                           
-                            string warningLevel = string.Empty;
-                            string errorTime = string.Empty;
-                            if (@row[WidgetInfo.WidgetInfo.VALUECOLMN].ToString() == "-1")
-                            {
-                                
-
-                                if(WidgetInfo.WidgetInfo.CHECKTYPE == 1)
+            @if (Data.Success)
+            {
+                <div class="table-responsive">
+                    <table class="table m-0">
+                        <thead>
+                            <tr>
+                                @foreach (var column in table.Columns)
                                 {
-                                    
-                                    if (!SearchErrorTime(row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString()))
-                                    {
-                                        ErrorTime[row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString()] = DateTime.Now;
-                                        errorTime = DateTime.Now.ToString("hh:mm:ss tt");
-                                    }
-                                    else
-                                    {
-                                        errorTime = ErrorTime[row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString()].ToString("hh:mm:ss tt");
-                                    }
-                                    warningLevel = ProcessWarning(GetErrortime(row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString()).ToString("hh:mm:ss tt"),row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString());
-
-                                    if (warningLevel == "blinking3-row")
-                                    {
-                                        JSRuntime.InvokeVoidAsync("toast", "Alert in" + WidgetInfo.WidgetInfo.NAME, row[WidgetInfo.WidgetInfo.GROUPCOLUMN], "Failing since :" + ErrorTime[row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString()].ToString(), "Has Error");
-                                    }
+                                    <th>@column.ToString()</th>
                                 }
-                                else if (WidgetInfo.WidgetInfo.CHECKTYPE == 2)
+                                <th>Error Time</th>
+                                <th>Avoid Check</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (DataRow row in table.Rows)
+                            {
+
+                                string warningLevel = string.Empty;
+                                string errorTime = string.Empty;
+                                if (@row[WidgetInfo.WidgetInfo.VALUECOLMN].ToString() == "-1")
                                 {
 
-                                    DateTime currentDateTime = DateTime.Now;
-                                    if (WidgetInfo.WidgetInfo.AFTERTIME.HasValue && currentDateTime.TimeOfDay > WidgetInfo.WidgetInfo.AFTERTIME.Value.TimeOfDay && currentDateTime.TimeOfDay < WidgetInfo.WidgetInfo.ENDTIME.Value.TimeOfDay)
+
+                                    if (WidgetInfo.WidgetInfo.CHECKTYPE == 1)
                                     {
-                                      
+
                                         if (!SearchErrorTime(row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString()))
                                         {
                                             ErrorTime[row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString()] = DateTime.Now;
@@ -101,66 +80,98 @@
                                             JSRuntime.InvokeVoidAsync("toast", "Alert in" + WidgetInfo.WidgetInfo.NAME, row[WidgetInfo.WidgetInfo.GROUPCOLUMN], "Failing since :" + ErrorTime[row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString()].ToString(), "Has Error");
                                         }
                                     }
-                                }
-
-                            }
-                            else
-                            {
-                                if (SearchErrorTime(row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString()))
-                                {
-                                    RemoveErrorTime(row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString());
-                                }
-                            }
-                            <tr class="@warningLevel">
-                                @foreach (DataColumn column in table.Columns)
-                                {
-                                   
-                                    if (column.ColumnName == WidgetInfo.WidgetInfo.VALUECOLMN)
+                                    else if (WidgetInfo.WidgetInfo.CHECKTYPE == 2)
                                     {
-                                        if (@row[column].ToString() == "-1")
+
+                                        DateTime currentDateTime = DateTime.Now;
+                                        if (WidgetInfo.WidgetInfo.AFTERTIME.HasValue && currentDateTime.TimeOfDay > WidgetInfo.WidgetInfo.AFTERTIME.Value.TimeOfDay && currentDateTime.TimeOfDay < WidgetInfo.WidgetInfo.ENDTIME.Value.TimeOfDay)
                                         {
-                                        
-                                            <td><span class="badge badge-danger">Error</span></td>
-                                           
+
+                                            if (!SearchErrorTime(row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString()))
+                                            {
+                                                ErrorTime[row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString()] = DateTime.Now;
+                                                errorTime = DateTime.Now.ToString("hh:mm:ss tt");
+                                            }
+                                            else
+                                            {
+                                                errorTime = ErrorTime[row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString()].ToString("hh:mm:ss tt");
+                                            }
+                                            warningLevel = ProcessWarning(GetErrortime(row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString()).ToString("hh:mm:ss tt"), row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString());
+
+                                            if (warningLevel == "blinking3-row")
+                                            {
+                                                JSRuntime.InvokeVoidAsync("toast", "Alert in" + WidgetInfo.WidgetInfo.NAME, row[WidgetInfo.WidgetInfo.GROUPCOLUMN], "Failing since :" + ErrorTime[row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString()].ToString(), "Has Error");
+                                            }
                                         }
-                                        else if (@row[column].ToString() == "1" || @row[column].ToString() == "0")
+                                    }
+
+                                }
+                                else
+                                {
+                                    if (SearchErrorTime(row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString()))
+                                    {
+                                        RemoveErrorTime(row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString());
+                                    }
+                                }
+                                <tr class="@warningLevel">
+                                    @foreach (DataColumn column in table.Columns)
+                                    {
+
+                                        if (column.ColumnName == WidgetInfo.WidgetInfo.VALUECOLMN)
                                         {
-                                            <td><span class="badge badge-success">Success</span></td>
-                                         
+                                            if (@row[column].ToString() == "-1")
+                                            {
+
+                                                <td><span class="badge badge-danger">Error</span></td>
+
+                                            }
+                                            else if (@row[column].ToString() == "1" || @row[column].ToString() == "0")
+                                            {
+                                                <td><span class="badge badge-success">Success</span></td>
+
+                                            }
+                                            else
+                                            {
+                                                <td><span class="badge badge-info">@row[column]</span></td>
+                                            }
                                         }
                                         else
                                         {
-                                            <td><span class="badge badge-info">@row[column]</span></td>
+                                            <td>@row[column]</td>
                                         }
-                                    }
-                                    else
-                                    {
-                                        <td>@row[column]</td>
-                                    }
 
-                                }
-                                <td>@if (!string.IsNullOrEmpty(errorTime))
-                                    {
-                                        
-                                        <p>@errorTime</p>
                                     }
-                                    else
-                                    {
-                                        <p>-</p>
-                                    }
-                                </td>
-                                <td>
-                                    <input type="checkbox" @onclick="()=> IgnoreWarning(row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString())" checked="@IsWarningIgnored(row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString())" />
-                                </td>
+                                    <td>@if (!string.IsNullOrEmpty(errorTime))
+                                        {
+
+                                            <p>@errorTime</p>
+                                        }
+                                        else
+                                        {
+                                            <p>-</p>
+                                        }
+                                    </td>
+                                    <td>
+                                        <input type="checkbox" @onclick="()=> IgnoreWarning(row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString())" checked="@IsWarningIgnored(row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString())" />
+                                    </td>
 
 
-                            </tr>
-                        }
+                                </tr>
+                            }
 
 
                     </tbody>
                 </table>
-            </div>
+                </div>
+            }
+            else
+            {
+                <div class="card-body p-0">
+                    <div class="text-container blinking3-row" style="min-height: 200px;">
+                        <span style=" font-size: 18px;" class="centered-text"><strong>The following error occured : </strong>@Data.Message</span>
+                    </div>
+                </div>
+            }
             <!-- /.table-responsive -->
         </div>
         <!-- /.card-body -->
@@ -232,6 +243,7 @@
     Dictionary<string, DateTime> ErrorTime = new Dictionary<string, DateTime>();
     Dictionary<string, bool> IgnoredWarnings = new Dictionary<string, bool>();
 
+    ServiceResponse<DataTable> Data = new ServiceResponse<DataTable>();
 
     public int? Level1 { get; set; }
     public int? Level2 { get; set; }
@@ -241,17 +253,16 @@
     protected override async Task OnInitializedAsync()
     {
         isLoading = true;
-        var Data = await WidgetService.GetWidgetData(WidgetInfo);
-        table = Data.Data;
-        message = Data.Message;
+        Data = await WidgetService.GetWidgetData(WidgetInfo);
+        table = Data.Success ? Data.Data : null;
+        message = Data.Success ? Data.Message : "";
 
-        if (table.Rows.Count > 0)
-        {
+       
             //ColumnNames = Rows[0].Keys.ToList();
             refreshIntervalInSeconds = WidgetInfo.WidgetInfo.REFRESHINTERVAL;
             timer = new Timer(RefreshWidget, null, TimeSpan.Zero, TimeSpan.FromSeconds(refreshIntervalInSeconds));
 
-        }
+        
         setWarningLevels(WidgetInfo.WidgetInfo.ALARMAFTER);
 
         isLoading = false;
@@ -289,9 +300,9 @@
 
     private async void RefreshWidget(object state)
     {
-        var Data = await WidgetService.GetWidgetData(WidgetInfo);
-        table = Data.Data;
-        message = Data.Message;
+        Data = await WidgetService.GetWidgetData(WidgetInfo);
+        table = Data.Success ? Data.Data : null;
+        message = Data.Success ? Data.Message : "";
 
         // Call the StateHasChanged method to notify the component to re-render
         await InvokeAsync(StateHasChanged);

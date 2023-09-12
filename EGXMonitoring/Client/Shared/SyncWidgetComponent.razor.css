@@ -75,3 +75,14 @@
 .loading-animation .spinner-border {
     color: #3c8dbc; /* Set the color to match your theme */
 }
+
+.text-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+.centered-text {
+    text-align: center;
+}

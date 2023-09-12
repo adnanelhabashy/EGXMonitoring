@@ -14,6 +14,8 @@ namespace EGXMonitoring.Shared
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int ID { get; set; }
+        [Required(ErrorMessage = "The User Name is required.")]
+
         public string USERNAME { get; set; } = string.Empty;    
         public byte[]? PASSWORDHASH { get; set; }
         public byte[]? PASSWORDSALT { get; set; }

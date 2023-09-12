@@ -32,11 +32,11 @@ namespace EGXMonitoring.Server.Controllers
             ServiceResponse<List<Dictionary<string, object>>> data = new ServiceResponse<List<Dictionary<string, object>>>();
             if (widget.WidgetInfo.WIDGETTYPE == 1)
             {
-                 data = _widgetService.GetWidgetData(widget.WidgetInfo);
+                 data = _widgetService.GetWidgetData(widget);
             }
             else if (widget.WidgetInfo.WIDGETTYPE == 2)
             {
-                 data = _widgetService.GetStatusWidgetData(widget.WidgetInfo);
+                 data = _widgetService.GetStatusWidgetData(widget);
             }
                
             return Ok(data);

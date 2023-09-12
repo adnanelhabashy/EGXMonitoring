@@ -1,6 +1,15 @@
 ﻿@inject IWidgetService WidgetService
 @inject IJSRuntime JSRuntime
 @using Microsoft.JSInterop
+<style>
+    .validation-message {
+        font-size: 12px;
+        color: red;
+        margin-top: 4px;
+        display: block;
+        align-items: center;
+    }
+</style>
 <div class="modal fade" id="AddWidget" tabindex="-1" role="dialog" aria-labelledby="Add Widget" aria-hidden="true">
     <div class="modal-dialog modal-lg" role="document">
         <div class="modal-content">
@@ -10,50 +19,50 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <EditForm Model="WidgetInfo" OnValidSubmit="AddWidget">
+            <EditForm Model="WidgetInfo.WidgetInfo" OnValidSubmit="AddWidget">
 
                 <div class="modal-body">
                     <div class="input-group mb-3">
                         <div class="input-group-prepend">
                             <span class="input-group-text">Name</span>
                         </div>
-                        <InputText type="text" @bind-Value="WidgetInfo.WidgetInfo.NAME" class="form-control" placeholder="" />
-                        <ValidationMessage For="@(() => WidgetInfo.WidgetInfo.NAME)"></ValidationMessage>
+                        <InputText type="text" @bind-Value="WidgetInfo.WidgetInfo.NAME" class="form-control" placeholder="" /><br/>
+                        <ValidationMessage class="validation-message" For="@(() => WidgetInfo.WidgetInfo.NAME)"></ValidationMessage>
                     </div>
                     <div class="input-group mb-3">
                         <div class="input-group-prepend">
                             <span class="input-group-text">Refresh Interval (in seconds)</span>
                         </div>
                         <InputNumber type="text" @bind-Value="WidgetInfo.WidgetInfo.REFRESHINTERVAL" class="form-control" placeholder="" />
-                        <ValidationMessage For="@(() => WidgetInfo.WidgetInfo.REFRESHINTERVAL)"></ValidationMessage>
+                        <ValidationMessage class="validation-message" For="@(() => WidgetInfo.WidgetInfo.REFRESHINTERVAL)"></ValidationMessage>
                     </div>
                     <div class="input-group mb-3">
                         <div class="input-group-prepend">
                             <span class="input-group-text">Alarm After (in minutes)</span>
                         </div>
                         <InputNumber type="text" @bind-Value="WidgetInfo.WidgetInfo.ALARMAFTER" class="form-control" placeholder="" />
-                        <ValidationMessage For="@(() => WidgetInfo.WidgetInfo.ALARMAFTER)"></ValidationMessage>
+                        <ValidationMessage class="validation-message" For="@(() => WidgetInfo.WidgetInfo.ALARMAFTER)"></ValidationMessage>
                     </div>
                     <div class="input-group mb-3">
                         <div class="input-group-prepend">
                             <span class="input-group-text">SQL Command</span>
                         </div>
                         <InputText type="text" @bind-Value="WidgetInfo.WidgetInfo.SQLCOMMAND" class="form-control" placeholder="" />
-                        <ValidationMessage For="@(() => WidgetInfo.WidgetInfo.SQLCOMMAND)"></ValidationMessage>
+                        <ValidationMessage class="validation-message" For="@(() => WidgetInfo.WidgetInfo.SQLCOMMAND)"></ValidationMessage>
                     </div>
                     <div class="input-group mb-3">
                         <div class="input-group-prepend">
                             <span class="input-group-text">Connection String</span>
                         </div>
-                        <InputTextArea type="text" @bind-Value="WidgetInfo.WidgetInfo.CONNCETIONSTRING" class="form-control" placeholder="" />
-                        <ValidationMessage For="@(() => WidgetInfo.WidgetInfo.CONNCETIONSTRING)"></ValidationMessage>
+                        <InputTextArea type="text" @bind-Value="WidgetInfo.ConnectionString" class="form-control" placeholder="" />
+                        <ValidationMessage class="validation-message" For="@(() => WidgetInfo.ConnectionString)"></ValidationMessage>
                     </div>
                     <div class="input-group mb-3">
                         <div class="input-group-prepend">
                             <span class="input-group-text">Value Column</span>
                         </div>
                         <InputText type="text" @bind-Value="WidgetInfo.WidgetInfo.VALUECOLMN" class="form-control" placeholder="" />
-                        <ValidationMessage For="@(() => WidgetInfo.WidgetInfo.VALUECOLMN)"></ValidationMessage>
+                        <ValidationMessage class="validation-message" For="@(() => WidgetInfo.WidgetInfo.VALUECOLMN)"></ValidationMessage>
                     </div>
                     <div class="input-group mb-3">
                         <div class="input-group-prepend">
@@ -67,7 +76,7 @@
                             <span class="input-group-text">Description</span>
                         </div>
                         <InputTextArea type="text" @bind-Value="WidgetInfo.WidgetInfo.DESCRIPTION" class="form-control" placeholder="" />
-                        <ValidationMessage For="@(() => WidgetInfo.WidgetInfo.DESCRIPTION)"></ValidationMessage>
+                        <ValidationMessage class="validation-message" For="@(() => WidgetInfo.WidgetInfo.DESCRIPTION)"></ValidationMessage>
                     </div>
                     <div class="input-group mb-3">
                         <div class="input-group-prepend">
@@ -77,7 +86,7 @@
                             <option value="1">Sync Widget</option>
                             <option value="2">Status Widget</option>
                         </InputSelect>
-                        <ValidationMessage For="@(() => WidgetInfo.WidgetInfo.DESCRIPTION)"></ValidationMessage>
+                        <ValidationMessage class="validation-message" For="@(() => WidgetInfo.WidgetInfo.DESCRIPTION)"></ValidationMessage>
                     </div>
                     <div class="input-group mb-3">
                         <div class="input-group-prepend">
@@ -87,7 +96,7 @@
                             <option value="1">Instant</option>
                             <option value="2">Time Interval</option>
                         </InputSelect>
-                        <ValidationMessage For="@(() => WidgetInfo.WidgetInfo.CHECKTYPE)"></ValidationMessage>
+                        <ValidationMessage class="validation-message" For="@(() => WidgetInfo.WidgetInfo.CHECKTYPE)"></ValidationMessage>
                     </div>
                     @if (showTimeInputs || WidgetInfo.WidgetInfo.CHECKTYPE == 2)
                     {
@@ -96,19 +105,19 @@
                                 <span class="input-group-text">Time Start</span>
                             </div>
                             <InputDate Type="InputDateType.Time" @bind-Value="@WidgetInfo.WidgetInfo.AFTERTIME" />
-                            <ValidationMessage For="@(() => WidgetInfo.WidgetInfo.AFTERTIME)"></ValidationMessage>
+                            <ValidationMessage class="validation-message" For="@(() => WidgetInfo.WidgetInfo.AFTERTIME)"></ValidationMessage>
                         </div>
                         <div class="input-group mb-3">
                             <div class="input-group-prepend">
                                 <span class="input-group-text">Time End</span>
                             </div>
                             <InputDate Type="InputDateType.Time" @bind-Value="@WidgetInfo.WidgetInfo.ENDTIME" />
-                            <ValidationMessage For="@(() => WidgetInfo.WidgetInfo.ENDTIME)"></ValidationMessage>
+                            <ValidationMessage class="validation-message" For="@(() => WidgetInfo.WidgetInfo.ENDTIME)"></ValidationMessage>
                         </div>
                     }
                 </div>
                 <div class="modal-footer">
-                 
+
                     <button type="button" class="btn btn-secondary" data-dismiss="modal"> Close </button>
                     <button type="submit" class="btn btn-primary"> Add Widget </button>
                 </div>
@@ -172,7 +181,7 @@
             if (response.Success)
             {
                 await JSRuntime.InvokeVoidAsync("toastSuccess", WidgetInfo.WidgetInfo.NAME, "Add Status", response.Message);
-               
+
             }
             else
             {
