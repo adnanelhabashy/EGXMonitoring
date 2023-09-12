@@ -14,8 +14,8 @@ namespace EGXMonitoring.Shared.DTOS
     public class ClientWidget
     {
         public Widget WidgetInfo { get; set; } = new Widget();
-        [Required(ErrorMessage = "The Connection String is required.")]
 
+        [Required(ErrorMessage = "The Connection String is required.")]
         public string ConnectionString { get; set; } = string.Empty;
     }
 }
