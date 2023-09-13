@@ -39,6 +39,10 @@ namespace EGXMonitoring.Shared
         public string? DESCRIPTION { get; set; } = string.Empty;
         public DateTime? ENDTIME { get; set; }
 
+        [Required(ErrorMessage = "The Severity is required.")]
+        public int? SEVERITY { get; set; }
         
+
+
     }
 }

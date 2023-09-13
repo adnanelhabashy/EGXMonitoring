@@ -10,14 +10,26 @@
             color: white;
         }
 
-        .dark-tile-layout-card {
-            background-color: #343a40;
+        .dark-tile-layout-card-Normal {
+            background-color: #004444;
+            color: white;
+        }
+
+        .dark-tile-layout-card-High {
+            background-color: #290D4A;
             color: white;
         }
 
     </style>
     @if (WidgetInfo.Data != null)
     {
+        <div>
+            <div class="overlay"></div>
+            <div class="alert">
+                <img class="blink-ani" src="images/DangerIcon.png" width="100" height="100" />
+                <p class="blink-ani" style="text-align:center">Alert</p>
+                </div>
+        </div>
 
         <TelerikTileLayout class="dark-tile-layout" Columns="12"
                            ColumnWidth="100%"
@@ -27,14 +39,14 @@
                            Resizable="true">
 
             <TileLayoutItems>
-                <div  class="tiles-container">
+                <div class="tiles-container">
                     @foreach (var widget in WidgetInfo.Data)
                     {
                         @if (widget.WidgetInfo.WIDGETTYPE == 1)
                         {
-                            <TileLayoutItem class="dark-tile-layout-card" ColSpan="3">
+                            <TileLayoutItem class="@(widget.WidgetInfo.SEVERITY == 1?"dark-tile-layout-card-Normal":"dark-tile-layout-card-High")" ColSpan="3">
                                 <HeaderTemplate>
-                                    <h4 style="color:white">@(widget.WidgetInfo.CHECKTYPE == 1?widget.WidgetInfo.NAME: widget.WidgetInfo.NAME +" Starts Working at "+ widget.WidgetInfo.AFTERTIME.Value.ToString("hh:mm tt"))</h4>
+                                    <h4 style="color:white">@(widget.WidgetInfo.CHECKTYPE == 1 ? widget.WidgetInfo.NAME : widget.WidgetInfo.NAME + " Starts Working at " + widget.WidgetInfo.AFTERTIME.Value.ToString("hh:mm tt"))</h4>
                                 </HeaderTemplate>
                                 <Content>
                                     <SyncWidgetComponent SetAlertEvent="SetAlert" StopAlertEvent="StopAlert" WidgetInfo=@widget />
@@ -43,9 +55,9 @@
                         }
                         @if (widget.WidgetInfo.WIDGETTYPE == 2)
                         {
-                            <TileLayoutItem class="dark-tile-layout-card" ColSpan="3">
+                            <TileLayoutItem class="@(widget.WidgetInfo.SEVERITY == 1?"dark-tile-layout-card-Normal":"dark-tile-layout-card-High")" ColSpan="3">
                                 <HeaderTemplate>
-                                    <h4 style="color:white">@(widget.WidgetInfo.CHECKTYPE == 1 ? widget.WidgetInfo.NAME : widget.WidgetInfo.NAME +" Starts Working at " + widget.WidgetInfo.AFTERTIME.Value.ToString("hh:mm tt"))</h4>
+                                    <h4 style="color:white">@(widget.WidgetInfo.CHECKTYPE == 1 ? widget.WidgetInfo.NAME : widget.WidgetInfo.NAME + " Starts Working at " + widget.WidgetInfo.AFTERTIME.Value.ToString("hh:mm tt"))</h4>
                                 </HeaderTemplate>
                                 <Content>
                                     <StatusWidget WidgetInfo=@widget />
@@ -58,7 +70,8 @@
                 </div>
             </TileLayoutItems>
         </TelerikTileLayout>
-       
+        <button class="dismiss-button btn btn-danger" onclick="dismissOverlay()">Dismiss</button>
+
     }
     <style>
         .tiles-container {
@@ -69,6 +82,7 @@
     <audio id="Alert" src="/sounds/Alert.wav" loop></audio>
     <script>
         window.setAlert = function () {
+            //audioElement.src = '/sounds/Alert.wav';
             var Alert = document.getElementById("Alert");
             Alert.play();
         };
@@ -83,6 +97,21 @@
             var Alert = document.getElementById("Alert");
             return !Alert.paused;
         };
+
+        function dismissOverlay() {
+            var overlay = document.querySelector('.overlay');
+            var alert = document.querySelector('.alert');
+            var dismissButton = document.querySelector('.dismiss-button');
+
+            overlay.style.display = 'none';
+            alert.style.display = 'none';
+            dismissButton.style.display = 'none';
+        }
+        function sendNotification(title, options) {
+            if (Notification.permission === 'granted') {
+                new Notification(title, options);
+            }
+        }
     </script>
 </AuthorizeView>
 @code {
@@ -97,6 +126,28 @@
         //await jsRuntime.InvokeVoidAsync("setAlert");
         //bool isPlaying = await jsRuntime.InvokeAsync<bool>("isAlertOn");
         bool isPlaying = await jsRuntime.InvokeAsync<bool>("isAlertOn");
+
+
+        if (await JSRuntime.InvokeAsync<string>("Notification.requestPermission") != "granted")
+        {
+            // Permission not granted, handle accordingly
+        }
+        else
+        {
+            await SendNotification();
+        }
+    }
+
+    private async Task SendNotification()
+    {
+        await JSRuntime.InvokeVoidAsync("sendNotification", "Notification Title", new
+        {
+            body = "Notification Body",
+            icon = "/images/DangerIcon.png",
+            tag = "EGX-Montioring",
+            renotify = true,
+            requireInteraction = true,
+        });
     }
     private async Task SetAlert(string parameter)
     {
@@ -122,7 +173,7 @@
         bool isPlaying = await jsRuntime.InvokeAsync<bool>("isAlertOn");
         if (!AlertWidgets.Contains(parameter))
         {
-            if (isPlaying && AlertWidgets.Count == 0  )
+            if (isPlaying && AlertWidgets.Count == 0)
             {
                 await jsRuntime.InvokeVoidAsync("stopAlert");
 
