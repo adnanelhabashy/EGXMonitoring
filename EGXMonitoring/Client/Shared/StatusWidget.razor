@@ -111,6 +111,11 @@
                                     if (SearchErrorTime(row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString()))
                                     {
                                         RemoveErrorTime(row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString());
+                                        if (AlertSent && ErrorTime.Count == 0)
+                                        {
+                                            StopAlertEvent.InvokeAsync(WidgetInfo.WidgetInfo.NAME);
+                                            AlertSent = false;
+                                        }
                                     }
                                 }
                                 <tr class="@warningLevel">
@@ -229,6 +234,10 @@
 @code {
     [Parameter]
     public ClientWidget WidgetInfo { get; set; }
+    [Parameter]
+    public EventCallback<string> SetAlertEvent { get; set; }
+    [Parameter]
+    public EventCallback<string> StopAlertEvent { get; set; }
     private Timer timer;
     private int refreshIntervalInSeconds;
     DataTable table = new DataTable();
@@ -244,6 +253,8 @@
     Dictionary<string, bool> IgnoredWarnings = new Dictionary<string, bool>();
 
     ServiceResponse<DataTable> Data = new ServiceResponse<DataTable>();
+    private bool AlertSent = false;
+
 
     public int? Level1 { get; set; }
     public int? Level2 { get; set; }
@@ -358,6 +369,11 @@
         }
         else
         {
+            if (!AlertSent)
+            {
+                SetAlertEvent.InvokeAsync(WidgetInfo.WidgetInfo.NAME);
+                AlertSent = true;
+            }
             return "blinking3-row";
         }
     }

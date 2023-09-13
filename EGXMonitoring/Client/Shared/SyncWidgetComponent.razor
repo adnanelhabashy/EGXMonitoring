@@ -106,6 +106,11 @@
                                         if (SearchErrorTime(@group.Key))
                                         {
                                             RemoveErrorTime(@group.Key);
+                                            if (AlertSent && ErrorTime.Count == 0)
+                                            {
+                                                StopAlertEvent.InvokeAsync(WidgetInfo.WidgetInfo.NAME);
+                                                AlertSent = false;
+                                            }
                                         }
                                         <tr>
                                             <td colspan="@table.Columns.Count">
@@ -213,6 +218,12 @@
 @code {
     [Parameter]
     public ClientWidget WidgetInfo { get; set; }
+
+    [Parameter]
+    public EventCallback<string> SetAlertEvent { get; set; }
+    [Parameter]
+    public EventCallback<string> StopAlertEvent { get; set; }
+
     private Timer timer;
     private int refreshIntervalInSeconds;
     DataTable table = new DataTable();
@@ -231,7 +242,8 @@
 
     ServiceResponse<DataTable> Data = new ServiceResponse<DataTable>();
 
-    private bool isPlaying;
+    private bool AlertSent = false;
+    private bool AlertStopped = false;
 
     protected override async Task OnInitializedAsync()
     {
@@ -336,6 +348,7 @@
         }
         if (timeDifferenceMilliseconds >= 0 && timeDifferenceMilliseconds <= Level1)
         {
+            
             return "blinking1-row";
         }
         else if (timeDifferenceMilliseconds >= Level1 && timeDifferenceMilliseconds <= Level2)
@@ -348,6 +361,11 @@
         }
         else
         {
+            if (!AlertSent )
+            {
+                SetAlertEvent.InvokeAsync(WidgetInfo.WidgetInfo.NAME);
+                AlertSent = true;
+            }
             return "blinking3-row";
         }
     }

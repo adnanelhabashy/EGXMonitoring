@@ -37,7 +37,7 @@
                                     <h4 style="color:white">@(widget.WidgetInfo.CHECKTYPE == 1?widget.WidgetInfo.NAME: widget.WidgetInfo.NAME +" Starts Working at "+ widget.WidgetInfo.AFTERTIME.Value.ToString("hh:mm tt"))</h4>
                                 </HeaderTemplate>
                                 <Content>
-                                    <SyncWidgetComponent WidgetInfo=@widget />
+                                    <SyncWidgetComponent SetAlertEvent="SetAlert" StopAlertEvent="StopAlert" WidgetInfo=@widget />
                                 </Content>
                             </TileLayoutItem>
                         }
@@ -89,15 +89,55 @@
 
 
     public ServiceResponse<List<ClientWidget>> WidgetInfo { get; set; } = new ServiceResponse<List<ClientWidget>>();
-
+    private List<string> AlertWidgets = new List<string>();
 
     protected override async Task OnInitializedAsync()
     {
         WidgetInfo = await WidgetService.GetWidgetsInfo();
         //await jsRuntime.InvokeVoidAsync("setAlert");
         //bool isPlaying = await jsRuntime.InvokeAsync<bool>("isAlertOn");
+        bool isPlaying = await jsRuntime.InvokeAsync<bool>("isAlertOn");
     }
+    private async Task SetAlert(string parameter)
+    {
+        bool isPlaying = await jsRuntime.InvokeAsync<bool>("isAlertOn");
+        if (!AlertWidgets.Contains(parameter))
+        {
+            AlertWidgets.Add(parameter);
+            if (!isPlaying)
+            {
+                await jsRuntime.InvokeVoidAsync("setAlert");
+            }
+        }
+        else
+        {
+            if (!isPlaying)
+            {
+                await jsRuntime.InvokeVoidAsync("setAlert");
+            }
+        }
+    }
+    private async Task StopAlert(string parameter)
+    {
+        bool isPlaying = await jsRuntime.InvokeAsync<bool>("isAlertOn");
+        if (!AlertWidgets.Contains(parameter))
+        {
+            if (isPlaying && AlertWidgets.Count == 0  )
+            {
+                await jsRuntime.InvokeVoidAsync("stopAlert");
 
+            }
+        }
+        else
+        {
+            AlertWidgets.Remove(parameter);
+            if (isPlaying && AlertWidgets.Count == 0)
+            {
+                await jsRuntime.InvokeVoidAsync("stopAlert");
+
+            }
+        }
+    }
 
 
 
