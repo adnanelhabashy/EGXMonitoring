@@ -77,5 +77,18 @@ namespace EGXMonitoring.Client.Services.WidgetService
             var data = await result.Content.ReadFromJsonAsync<ServiceResponse<ClientWidget>>();
             return data;
         }
+
+        public async Task<ServiceResponse<List<TabLayouts>>> GetTabsLayout()
+        {
+            var layouts = await _http.GetFromJsonAsync<ServiceResponse<List<TabLayouts>>>("api/Widgets/GetLayouts");
+            return layouts;
+        }
+
+        public async Task<ServiceResponse<List<TabLayouts>>> SetTabsLayout(List<TabLayouts> TabsLayouts)
+        {
+            var result = await _http.PostAsJsonAsync("api/Widgets/SetLayouts", TabsLayouts);
+            var data = await result.Content.ReadFromJsonAsync<ServiceResponse<List<TabLayouts>>>();
+            return data;
+        }
     }
 }

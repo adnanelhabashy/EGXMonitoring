@@ -63,6 +63,18 @@ namespace EGXMonitoring.Server.Controllers
             return Ok(response);
         }
 
+        [HttpGet("GetLayouts")]
+        public async Task<ActionResult<ServiceResponse<List<TabLayouts>>>> GetLayouts()
+        {
+            var result = await _widgetService.GetTabLayouts();
+            return Ok(result);
+        }
+        [HttpPost("SetLayouts")]
+        public async Task<ActionResult<ServiceResponse<List<TabLayouts>>>> SetLayouts(List<TabLayouts> Layouts)
+        {
+            var response = await _widgetService.SetTabLayouts(Layouts);
+            return Ok(response);
+        }
 
     }
 }

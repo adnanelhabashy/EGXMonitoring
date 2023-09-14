@@ -8,6 +8,7 @@ using Oracle.ManagedDataAccess.Client;
 using System.Data;
 using System.Linq;
 using System.Reflection.Metadata.Ecma335;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json.Nodes;
@@ -17,13 +18,16 @@ namespace EGXMonitoring.Server.Services.WidgetService
     public class WidgetService : IWidgetService
     {
         private readonly DataContext _context;
-        private byte[] key;
-        private byte[] iv;
 
-        public WidgetService(DataContext context)
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+        public WidgetService(DataContext context, IHttpContextAccessor httpContextAccessor)
         {
             _context = context;
+            _httpContextAccessor = httpContextAccessor;
         }
+        private int GetUserId() => int.Parse(_httpContextAccessor.HttpContext.User.FindFirstValue(ClaimTypes.NameIdentifier));
+
 
         public ServiceResponse<List<Dictionary<string, object>>> GetWidgetData(ClientWidget widgetInfo)
         {
@@ -347,6 +351,65 @@ namespace EGXMonitoring.Server.Services.WidgetService
                     }
                 }
             }
+        }
+
+        public async Task<ServiceResponse<List<TabLayouts>>> GetTabLayouts()
+        {
+            try
+            {
+                return new ServiceResponse<List<TabLayouts>>()
+                {
+                    Data = await _context.TabsLayouts.Where(tl => tl.USERID == GetUserId()).ToListAsync(),
+                    Success = true,
+                    Message = "layouts loaded successfully"
+
+                };
+            }
+            catch(Exception ex) {
+                return new ServiceResponse<List<TabLayouts>>()
+                {
+                    Data =null,
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
+
+        public async Task<ServiceResponse<List<TabLayouts>>> SetTabLayouts(List<TabLayouts> Layouts)
+        {
+            try
+            {
+                foreach (TabLayouts layout in Layouts)
+                {
+                    if (_context.TabsLayouts.Where(tl => tl.USERID == layout.USERID && tl.TABNAME == layout.TABNAME).ToList().Count() > 0)
+                    {
+                        TabLayouts DBLayout = _context.TabsLayouts.Where(tl => tl.USERID == layout.USERID && tl.TABNAME == layout.TABNAME).FirstOrDefault();
+                        DBLayout.TABSTATE = layout.TABSTATE;
+                        _context.TabsLayouts.Update(DBLayout);
+                        await _context.SaveChangesAsync();
+                    }
+                    else
+                    {
+                        await _context.TabsLayouts.AddAsync(layout);
+                        await _context.SaveChangesAsync();
+                    }
+                }
+                return new ServiceResponse<List<TabLayouts>>()
+                {
+                    Data = Layouts,
+                    Success = true,
+                    Message = "Layouts Updated"
+                };
+            }
+            catch (Exception ex) {
+                return new ServiceResponse<List<TabLayouts>>()
+                {
+                    Data = null,
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+          
         }
     }
 }

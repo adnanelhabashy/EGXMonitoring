@@ -60,3 +60,34 @@
     cursor: pointer;
     z-index: 10001;
 }
+.button-container {
+    position: relative;
+     /* Adjust margin as needed */
+}
+
+.custom-button {
+    position: absolute;
+    top: 0;
+    right: 2px;
+    margin-top: 2px;
+    padding: 10px 20px;
+    background-color: #008b8b; /* Dark Cyan color */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+    .custom-button:hover {
+        background-color: #006666; /* Darker shade of Dark Cyan on hover */
+    }
+
+    .custom-button:focus {
+        outline: none;
+        box-shadow: 0 0 0 3px rgba(0, 139, 139, 0.5); /* Dark Cyan color with transparency */
+    }
+    .custom-button:hover {
+        background-color: #006666; /* Darker shade of Dark Cyan on hover */
+        z-index: 9999;
+    }

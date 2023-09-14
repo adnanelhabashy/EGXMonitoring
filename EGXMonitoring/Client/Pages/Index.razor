@@ -1,6 +1,9 @@
 ﻿@page "/"
 @inject IWidgetService WidgetService
 @inject IJSRuntime jsRuntime
+@inject AuthenticationStateProvider _AuthProvider
+@using System.Security.Claims
+@using System.Text.Json
 @attribute [Authorize]
 <link rel="stylesheet" href="plugins/toastr/toastr.min.css">
 <AuthorizeView>
@@ -21,6 +24,7 @@
         }
 
     </style>
+    
     @if (WidgetInfo.Data != null)
     {
         <div style="display: @(ShowAlert ? "block" : "none")">
@@ -59,13 +63,18 @@
                         <div class="tab-content" id="custom-tabs-five-tabContent">
                             <div class="tab-pane fade show active" id="during-seesion" role="tabpanel" aria-labelledby="custom-tabs-five-overlay-tab">
                                 <div class="overlay-wrapper">
+                         
                                     @if (isLoading)
                                     {
                                         <div class="overlay"><i class="fas fa-3x fa-sync-alt fa-spin"></i><div class="text-bold pt-2">Loading...</div></div>
                                     }
                                     @if (WidgetInfo.Data.Where(w => w.WidgetInfo.TABID == 1).Count() > 0)
                                     {
-                                        <TelerikTileLayout class="dark-tile-layout" Columns="12"
+                                        <div class="button-container">
+                                            <button class="custom-button" @onclick='() => SaveLayout("during-seesion")'>Save Layout</button>
+                                        </div>
+                                        <TelerikTileLayout @ref="@TileDuringSessionInstance"
+                                                           class="dark-tile-layout" Columns="12"
                                                            ColumnWidth="100%"
                                                            RowHeight="100%"
                                                            Height="Auto"
@@ -79,7 +88,7 @@
                                                         {
                                                             <TileLayoutItem class="@(widget.WidgetInfo.SEVERITY == 1?"dark-tile-layout-card-Normal":"dark-tile-layout-card-High")" ColSpan="3">
                                                                 <HeaderTemplate>
-                                                                    <h4 style="color:white">@(widget.WidgetInfo.CHECKTYPE == 1 ? widget.WidgetInfo.NAME : widget.WidgetInfo.NAME + " Starts Working at " + widget.WidgetInfo.AFTERTIME.Value.ToString("hh:mm tt"))</h4>
+                                                                    <h4 style="color:white;text-align:center ;height: 10px;">@(widget.WidgetInfo.CHECKTYPE == 1 ? widget.WidgetInfo.NAME : widget.WidgetInfo.NAME + " Starts Working at " + widget.WidgetInfo.AFTERTIME.Value.ToString("hh:mm tt"))</h4>
                                                                 </HeaderTemplate>
                                                                 <Content>
                                                                     <SyncWidgetComponent SetAlertEvent="SetAlert" StopAlertEvent="StopAlert" WidgetInfo=@widget />
@@ -90,7 +99,7 @@
                                                         {
                                                             <TileLayoutItem class="@(widget.WidgetInfo.SEVERITY == 1?"dark-tile-layout-card-Normal":"dark-tile-layout-card-High")" ColSpan="3">
                                                                 <HeaderTemplate>
-                                                                    <h4 style="color:white">@(widget.WidgetInfo.CHECKTYPE == 1 ? widget.WidgetInfo.NAME : widget.WidgetInfo.NAME + " Starts Working at " + widget.WidgetInfo.AFTERTIME.Value.ToString("hh:mm tt"))</h4>
+                                                                    <h4 style="color:white;text-align:center ;height: 10px;">@(widget.WidgetInfo.CHECKTYPE == 1 ? widget.WidgetInfo.NAME : widget.WidgetInfo.NAME + " Starts Working at " + widget.WidgetInfo.AFTERTIME.Value.ToString("hh:mm tt"))</h4>
                                                                 </HeaderTemplate>
                                                                 <Content>
                                                                     <StatusWidget SetAlertEvent="SetAlert" StopAlertEvent="StopAlert" WidgetInfo=@widget />
@@ -119,7 +128,11 @@
                                     }
                                     @if (WidgetInfo.Data.Where(w => w.WidgetInfo.TABID == 2).Count() > 0)
                                     {
-                                        <TelerikTileLayout class="dark-tile-layout" Columns="12"
+                                        <div class="button-container">
+                                            <button class="custom-button" @onclick='() => SaveLayout("end-of-day")'>Save Layout</button>
+                                        </div>
+                                        <TelerikTileLayout @ref="@TileEndOfDayInstance"
+                                                           class="dark-tile-layout" Columns="12"
                                                            ColumnWidth="100%"
                                                            RowHeight="100%"
                                                            Height="Auto"
@@ -133,7 +146,7 @@
                                                         {
                                                             <TileLayoutItem class="@(widget.WidgetInfo.SEVERITY == 1?"dark-tile-layout-card-Normal":"dark-tile-layout-card-High")" ColSpan="3">
                                                                 <HeaderTemplate>
-                                                                    <h4 style="color:white">@(widget.WidgetInfo.CHECKTYPE == 1 ? widget.WidgetInfo.NAME : widget.WidgetInfo.NAME + " Starts Working at " + widget.WidgetInfo.AFTERTIME.Value.ToString("hh:mm tt"))</h4>
+                                                                    <h4 style="color:white;text-align:center ;height: 10px;">@(widget.WidgetInfo.CHECKTYPE == 1 ? widget.WidgetInfo.NAME : widget.WidgetInfo.NAME + " Starts Working at " + widget.WidgetInfo.AFTERTIME.Value.ToString("hh:mm tt"))</h4>
                                                                 </HeaderTemplate>
                                                                 <Content>
                                                                     <SyncWidgetComponent SetAlertEvent="SetAlert" StopAlertEvent="StopAlert" WidgetInfo=@widget />
@@ -144,7 +157,7 @@
                                                         {
                                                             <TileLayoutItem class="@(widget.WidgetInfo.SEVERITY == 1?"dark-tile-layout-card-Normal":"dark-tile-layout-card-High")" ColSpan="3">
                                                                 <HeaderTemplate>
-                                                                    <h4 style="color:white">@(widget.WidgetInfo.CHECKTYPE == 1 ? widget.WidgetInfo.NAME : widget.WidgetInfo.NAME + " Starts Working at " + widget.WidgetInfo.AFTERTIME.Value.ToString("hh:mm tt"))</h4>
+                                                                    <h4 style="color:white;text-align:center ;height: 10px;">@(widget.WidgetInfo.CHECKTYPE == 1 ? widget.WidgetInfo.NAME : widget.WidgetInfo.NAME + " Starts Working at " + widget.WidgetInfo.AFTERTIME.Value.ToString("hh:mm tt"))</h4>
                                                                 </HeaderTemplate>
                                                                 <Content>
                                                                     <StatusWidget SetAlertEvent="SetAlert" StopAlertEvent="StopAlert" WidgetInfo=@widget />
@@ -172,7 +185,11 @@
                                     }
                                     @if (WidgetInfo.Data.Where(w => w.WidgetInfo.TABID == 3).Count() > 0)
                                     {
-                                        <TelerikTileLayout class="dark-tile-layout" Columns="12"
+                                        <div class="button-container">
+                                            <button class="custom-button" @onclick='() => SaveLayout("running-procedures")'>Save Layout</button>
+                                        </div>
+                                        <TelerikTileLayout @ref="@TileRunningProceduresInstance"
+                                                           class="dark-tile-layout" Columns="12"
                                                            ColumnWidth="100%"
                                                            RowHeight="100%"
                                                            Height="Auto"
@@ -186,7 +203,7 @@
                                                         {
                                                             <TileLayoutItem class="@(widget.WidgetInfo.SEVERITY == 1?"dark-tile-layout-card-Normal":"dark-tile-layout-card-High")" ColSpan="3">
                                                                 <HeaderTemplate>
-                                                                    <h4 style="color:white">@(widget.WidgetInfo.CHECKTYPE == 1 ? widget.WidgetInfo.NAME : widget.WidgetInfo.NAME + " Starts Working at " + widget.WidgetInfo.AFTERTIME.Value.ToString("hh:mm tt"))</h4>
+                                                                    <h4 style="color:white;text-align:center ;height: 10px;">@(widget.WidgetInfo.CHECKTYPE == 1 ? widget.WidgetInfo.NAME : widget.WidgetInfo.NAME + " Starts Working at " + widget.WidgetInfo.AFTERTIME.Value.ToString("hh:mm tt"))</h4>
                                                                 </HeaderTemplate>
                                                                 <Content>
                                                                     <SyncWidgetComponent SetAlertEvent="SetAlert" StopAlertEvent="StopAlert" WidgetInfo=@widget />
@@ -197,7 +214,7 @@
                                                         {
                                                             <TileLayoutItem class="@(widget.WidgetInfo.SEVERITY == 1?"dark-tile-layout-card-Normal":"dark-tile-layout-card-High")" ColSpan="3">
                                                                 <HeaderTemplate>
-                                                                    <h4 style="color:white">@(widget.WidgetInfo.CHECKTYPE == 1 ? widget.WidgetInfo.NAME : widget.WidgetInfo.NAME + " Starts Working at " + widget.WidgetInfo.AFTERTIME.Value.ToString("hh:mm tt"))</h4>
+                                                                    <h4 style="color:white;text-align:center ;height: 10px;">@(widget.WidgetInfo.CHECKTYPE == 1 ? widget.WidgetInfo.NAME : widget.WidgetInfo.NAME + " Starts Working at " + widget.WidgetInfo.AFTERTIME.Value.ToString("hh:mm tt"))</h4>
                                                                 </HeaderTemplate>
                                                                 <Content>
                                                                     <StatusWidget SetAlertEvent="SetAlert" StopAlertEvent="StopAlert" WidgetInfo=@widget />
@@ -225,7 +242,12 @@
                                     }
                                     @if (WidgetInfo.Data.Where(w => w.WidgetInfo.TABID == 4).Count() > 0)
                                     {
-                                        <TelerikTileLayout class="dark-tile-layout" Columns="12"
+                                        <div class="button-container">
+                                            <button class="custom-button" @onclick='() => SaveLayout("vetting")'>Save Layout</button>
+                                        </div>
+                                        <TelerikTileLayout @ref="@TileVettingInstance"
+                                                           class="dark-tile-layout" 
+                                                           Columns="12"
                                                            ColumnWidth="100%"
                                                            RowHeight="100%"
                                                            Height="Auto"
@@ -239,7 +261,7 @@
                                                         {
                                                             <TileLayoutItem class="@(widget.WidgetInfo.SEVERITY == 1?"dark-tile-layout-card-Normal":"dark-tile-layout-card-High")" ColSpan="3">
                                                                 <HeaderTemplate>
-                                                                    <h4 style="color:white">@(widget.WidgetInfo.CHECKTYPE == 1 ? widget.WidgetInfo.NAME : widget.WidgetInfo.NAME + " Starts Working at " + widget.WidgetInfo.AFTERTIME.Value.ToString("hh:mm tt"))</h4>
+                                                                    <h4 style="color:white;text-align:center ;height: 10px;">@(widget.WidgetInfo.CHECKTYPE == 1 ? widget.WidgetInfo.NAME : widget.WidgetInfo.NAME + " Starts Working at " + widget.WidgetInfo.AFTERTIME.Value.ToString("hh:mm tt"))</h4>
                                                                 </HeaderTemplate>
                                                                 <Content>
                                                                     <SyncWidgetComponent SetAlertEvent="SetAlert" StopAlertEvent="StopAlert" WidgetInfo=@widget />
@@ -250,7 +272,7 @@
                                                         {
                                                             <TileLayoutItem class="@(widget.WidgetInfo.SEVERITY == 1?"dark-tile-layout-card-Normal":"dark-tile-layout-card-High")" ColSpan="3">
                                                                 <HeaderTemplate>
-                                                                    <h4 style="color:white">@(widget.WidgetInfo.CHECKTYPE == 1 ? widget.WidgetInfo.NAME : widget.WidgetInfo.NAME + " Starts Working at " + widget.WidgetInfo.AFTERTIME.Value.ToString("hh:mm tt"))</h4>
+                                                                    <h4 style="color:white;text-align:center ;height: 10px;">@(widget.WidgetInfo.CHECKTYPE == 1 ? widget.WidgetInfo.NAME : widget.WidgetInfo.NAME + " Starts Working at " + widget.WidgetInfo.AFTERTIME.Value.ToString("hh:mm tt"))</h4>
                                                                 </HeaderTemplate>
                                                                 <Content>
                                                                     <StatusWidget SetAlertEvent="SetAlert" StopAlertEvent="StopAlert" WidgetInfo=@widget />
@@ -272,6 +294,9 @@
                             </div>
                             <div class="tab-pane fade show " id="bulletins-pdf" role="tabpanel" aria-labelledby="custom-tabs-five-overlay-tab">
                                 <div class="overlay-wrapper">
+                                    <iframe src="http://brkintra.egx.com/bulletins_files_Check/PDF_Monitor.aspx?output=embed"
+                                            width="100%" frameborder="0" height="500">
+                                    </iframe>
                                 </div>
                             </div>
                         </div>
@@ -352,6 +377,13 @@
     public int ActiveTabIndex { get; set; } = 1;
     public bool isLoading { get; set; } = false;
 
+    TelerikTileLayout TileDuringSessionInstance { get; set; }
+    TelerikTileLayout TileEndOfDayInstance { get; set; }
+    TelerikTileLayout TileRunningProceduresInstance { get; set; }
+    TelerikTileLayout TileVettingInstance { get; set; }
+
+    int UserId = 0;
+
     protected override async Task OnInitializedAsync()
     {
         isLoading = true;
@@ -371,7 +403,68 @@
             // await SendNotification();
         }
         isLoading = false;
+        var authenticationState = await _AuthProvider.GetAuthenticationStateAsync();
+        var user = authenticationState.User;
+        UserId = Int32.Parse(user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value);
+        await GetTabStates();
     }
+    private void SaveLayout(string tabName)
+    {
+        TabLayouts layout = new TabLayouts()
+            {
+                USERID = UserId,
+                TABNAME = tabName,
+            };
+        switch (tabName)
+        {
+            case "during-seesion":
+                layout.TABSTATE = System.Text.Json.JsonSerializer.Serialize(TileDuringSessionInstance.GetState());
+                break;
+            case "end-of-day":
+                layout.TABSTATE =  System.Text.Json.JsonSerializer.Serialize(TileEndOfDayInstance.GetState());
+                break;
+            case "running-procedures":
+                layout.TABSTATE =  System.Text.Json.JsonSerializer.Serialize(TileRunningProceduresInstance.GetState());
+                break;
+            case "vetting":
+                layout.TABSTATE =  System.Text.Json.JsonSerializer.Serialize(TileVettingInstance.GetState());
+                break;
+
+        }
+        List<TabLayouts> layouts = new List<TabLayouts>();
+        layouts.Add(layout);
+        WidgetService.SetTabsLayout(layouts);
+    }
+
+    private async Task GetTabStates()
+    {
+        var response = await WidgetService.GetTabsLayout();
+        List<TabLayouts> tabLayouts = response.Data;
+        foreach(var tab in tabLayouts)
+        {
+            switch (tab.TABNAME)
+            {
+                case "during-seesion":
+                    if (TileDuringSessionInstance != null)
+                    TileDuringSessionInstance.SetState(System.Text.Json.JsonSerializer.Deserialize<TileLayoutState>(tab.TABSTATE));
+                    break;
+                case "end-of-day":
+                    if (TileEndOfDayInstance != null)
+                    TileEndOfDayInstance.SetState(System.Text.Json.JsonSerializer.Deserialize<TileLayoutState>(tab.TABSTATE));
+                    break;
+                case "running-procedures":
+                    if (TileRunningProceduresInstance != null)
+                    TileRunningProceduresInstance.SetState(System.Text.Json.JsonSerializer.Deserialize<TileLayoutState>(tab.TABSTATE));
+                    break;
+                case "vetting":
+                    if(TileVettingInstance != null )
+                    TileVettingInstance.SetState(System.Text.Json.JsonSerializer.Deserialize<TileLayoutState>(tab.TABSTATE));
+                    break;
+            }
+        }
+    }
+
+
 
     private async Task SendNotification(string Body)
     {
