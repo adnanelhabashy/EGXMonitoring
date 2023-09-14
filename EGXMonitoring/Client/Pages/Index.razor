@@ -23,13 +23,29 @@
     </style>
     @if (WidgetInfo.Data != null)
     {
-        <div>
+        <div style="display: @(ShowAlert ? "block" : "none")">
             <div class="overlay"></div>
             <div class="alert">
                 <img class="blink-ani" src="images/DangerIcon.png" width="100" height="100" />
                 <p class="blink-ani" style="text-align:center">Alert</p>
-                </div>
+            </div>
         </div>
+
+
+@*         <TelerikTabStrip Class="dark-tile-layout">
+            <TabStripTab Title="During Session">
+            </TabStripTab>
+            <TabStripTab Title="End Of Day">
+            </TabStripTab>
+            <TabStripTab Title="Running Procedures">
+            </TabStripTab>
+            <TabStripTab Title="Vetting">
+            </TabStripTab>
+            <TabStripTab Title="Bulletins PDF">
+            </TabStripTab>
+        </TelerikTabStrip> *@
+
+
 
         <TelerikTileLayout class="dark-tile-layout" Columns="12"
                            ColumnWidth="100%"
@@ -60,7 +76,7 @@
                                     <h4 style="color:white">@(widget.WidgetInfo.CHECKTYPE == 1 ? widget.WidgetInfo.NAME : widget.WidgetInfo.NAME + " Starts Working at " + widget.WidgetInfo.AFTERTIME.Value.ToString("hh:mm tt"))</h4>
                                 </HeaderTemplate>
                                 <Content>
-                                    <StatusWidget WidgetInfo=@widget />
+                                    <StatusWidget SetAlertEvent="SetAlert" StopAlertEvent="StopAlert" WidgetInfo=@widget />
                                 </Content>
                             </TileLayoutItem>
                         }
@@ -70,7 +86,7 @@
                 </div>
             </TileLayoutItems>
         </TelerikTileLayout>
-        <button class="dismiss-button btn btn-danger" onclick="dismissOverlay()">Dismiss</button>
+        <button style="display:@(ShowAlert ? "block" : "none")" class="dismiss-button btn btn-danger" onclick="dismissOverlay()">Dismiss</button>
 
     }
     <style>
@@ -80,21 +96,40 @@
         }
     </style>
     <audio id="Alert" src="/sounds/Alert.wav" loop></audio>
+    <audio id="HighAlert" src="/sounds/HighAlert.wav" loop></audio>
+
     <script>
-        window.setAlert = function () {
-            //audioElement.src = '/sounds/Alert.wav';
-            var Alert = document.getElementById("Alert");
+        window.setAlert = function (severity) {
+            var Alert;
+            if (severity == 1) {
+                Alert = document.getElementById("Alert");
+            }
+            if (severity == 2) {
+                Alert = document.getElementById("HighAlert");
+            }
             Alert.play();
         };
 
-        window.stopAlert = function () {
-            var Alert = document.getElementById("Alert");
+        window.stopAlert = function (severity) {
+            var Alert;
+            if (severity == 1) {
+                Alert = document.getElementById("Alert");
+            }
+            if (severity == 2) {
+                Alert = document.getElementById("HighAlert");
+            }
             Alert.pause();
             Alert.currentTime = 0;
         };
 
-        window.isAlertOn = function () {
-            var Alert = document.getElementById("Alert");
+        window.isAlertOn = function (severity) {
+            var Alert;
+            if (severity == 1) {
+                Alert = document.getElementById("Alert");
+            }
+            if (severity == 2) {
+                Alert = document.getElementById("HighAlert");
+            }
             return !Alert.paused;
         };
 
@@ -119,13 +154,15 @@
 
     public ServiceResponse<List<ClientWidget>> WidgetInfo { get; set; } = new ServiceResponse<List<ClientWidget>>();
     private List<string> AlertWidgets = new List<string>();
+    public bool ShowAlert { get; set; } = false;
+    public int ActiveTabIndex { get; set; } = 1;
 
     protected override async Task OnInitializedAsync()
     {
         WidgetInfo = await WidgetService.GetWidgetsInfo();
         //await jsRuntime.InvokeVoidAsync("setAlert");
         //bool isPlaying = await jsRuntime.InvokeAsync<bool>("isAlertOn");
-        bool isPlaying = await jsRuntime.InvokeAsync<bool>("isAlertOn");
+        //bool isPlaying = await jsRuntime.InvokeAsync<bool>("isAlertOn");
 
 
         if (await JSRuntime.InvokeAsync<string>("Notification.requestPermission") != "granted")
@@ -134,58 +171,67 @@
         }
         else
         {
-            await SendNotification();
+            // await SendNotification();
         }
     }
 
-    private async Task SendNotification()
+    private async Task SendNotification(string Body)
     {
         await JSRuntime.InvokeVoidAsync("sendNotification", "Notification Title", new
         {
-            body = "Notification Body",
+            body = Body,
             icon = "/images/DangerIcon.png",
             tag = "EGX-Montioring",
             renotify = true,
             requireInteraction = true,
         });
     }
-    private async Task SetAlert(string parameter)
+    private async Task SetAlert(AlertEventData eventData)
     {
-        bool isPlaying = await jsRuntime.InvokeAsync<bool>("isAlertOn");
-        if (!AlertWidgets.Contains(parameter))
+        bool isPlaying = await jsRuntime.InvokeAsync<bool>("isAlertOn", eventData.Severity);
+        if (!AlertWidgets.Contains(eventData.Message))
         {
-            AlertWidgets.Add(parameter);
+            AlertWidgets.Add(eventData.Message);
             if (!isPlaying)
             {
-                await jsRuntime.InvokeVoidAsync("setAlert");
+                await jsRuntime.InvokeVoidAsync("setAlert", eventData.Severity);
             }
         }
         else
         {
             if (!isPlaying)
             {
-                await jsRuntime.InvokeVoidAsync("setAlert");
+                await jsRuntime.InvokeVoidAsync("setAlert", eventData.Severity);
             }
+        }
+        if (eventData.Severity == 2 && !ShowAlert)
+        {
+            ShowAlert = true;
+            await SendNotification("There is an urgent error in the (" + eventData.Message + ") widget");
         }
     }
-    private async Task StopAlert(string parameter)
+    private async Task StopAlert(AlertEventData eventData)
     {
-        bool isPlaying = await jsRuntime.InvokeAsync<bool>("isAlertOn");
-        if (!AlertWidgets.Contains(parameter))
+        bool isPlaying = await jsRuntime.InvokeAsync<bool>("isAlertOn", eventData.Severity);
+        if (!AlertWidgets.Contains(eventData.Message))
         {
             if (isPlaying && AlertWidgets.Count == 0)
             {
-                await jsRuntime.InvokeVoidAsync("stopAlert");
+                await jsRuntime.InvokeVoidAsync("stopAlert", eventData.Severity);
 
             }
         }
         else
         {
-            AlertWidgets.Remove(parameter);
+            AlertWidgets.Remove(eventData.Message);
             if (isPlaying && AlertWidgets.Count == 0)
             {
-                await jsRuntime.InvokeVoidAsync("stopAlert");
+                await jsRuntime.InvokeVoidAsync("stopAlert", eventData.Severity);
 
+            }
+            if (eventData.Severity == 2 && ShowAlert)
+            {
+                ShowAlert = false;
             }
         }
     }

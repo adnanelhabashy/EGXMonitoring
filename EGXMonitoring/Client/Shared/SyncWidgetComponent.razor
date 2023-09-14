@@ -108,7 +108,7 @@
                                             RemoveErrorTime(@group.Key);
                                             if (AlertSent && ErrorTime.Count == 0)
                                             {
-                                                StopAlertEvent.InvokeAsync(WidgetInfo.WidgetInfo.NAME);
+                                                StopAlertEvent.InvokeAsync(eventData);
                                                 AlertSent = false;
                                             }
                                         }
@@ -220,9 +220,9 @@
     public ClientWidget WidgetInfo { get; set; }
 
     [Parameter]
-    public EventCallback<string> SetAlertEvent { get; set; }
+    public EventCallback<AlertEventData> SetAlertEvent { get; set; }
     [Parameter]
-    public EventCallback<string> StopAlertEvent { get; set; }
+    public EventCallback<AlertEventData> StopAlertEvent { get; set; }
 
     private Timer timer;
     private int refreshIntervalInSeconds;
@@ -244,6 +244,7 @@
 
     private bool AlertSent = false;
     private bool AlertStopped = false;
+    AlertEventData eventData;
 
     protected override async Task OnInitializedAsync()
     {
@@ -259,6 +260,14 @@
         timer = new Timer(RefreshWidget, null, TimeSpan.Zero, TimeSpan.FromSeconds(refreshIntervalInSeconds));
         setWarningLevels(WidgetInfo.WidgetInfo.ALARMAFTER);
         isLoading = false;
+        if (Data.Success)
+        {
+            eventData = new AlertEventData
+                {
+                    Message = WidgetInfo.WidgetInfo.NAME,
+                    Severity = WidgetInfo.WidgetInfo.SEVERITY
+                };
+        }
 
     }
 
@@ -363,7 +372,8 @@
         {
             if (!AlertSent )
             {
-                SetAlertEvent.InvokeAsync(WidgetInfo.WidgetInfo.NAME);
+               
+                SetAlertEvent.InvokeAsync(eventData);
                 AlertSent = true;
             }
             return "blinking3-row";

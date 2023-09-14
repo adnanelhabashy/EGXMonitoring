@@ -113,7 +113,7 @@
                                         RemoveErrorTime(row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString());
                                         if (AlertSent && ErrorTime.Count == 0)
                                         {
-                                            StopAlertEvent.InvokeAsync(WidgetInfo.WidgetInfo.NAME);
+                                            StopAlertEvent.InvokeAsync(eventData);
                                             AlertSent = false;
                                         }
                                     }
@@ -146,7 +146,8 @@
                                         }
 
                                     }
-                                    <td>@if (!string.IsNullOrEmpty(errorTime))
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(errorTime))
                                         {
 
                                             <p>@errorTime</p>
@@ -165,8 +166,8 @@
                             }
 
 
-                    </tbody>
-                </table>
+                        </tbody>
+                    </table>
                 </div>
             }
             else
@@ -193,30 +194,30 @@
 
 @* <WidgetInfoModal WidgetInfo="WidgetInfo"></WidgetInfoModal>
  *@<script>
-    window.enterFullScreen = function (elementId) {
-        const element = document.getElementById(elementId);
-        if (element.requestFullscreen) {
-            element.requestFullscreen();
-        } else if (element.mozRequestFullScreen) {
-            element.mozRequestFullScreen();
-        } else if (element.webkitRequestFullscreen) {
-            element.webkitRequestFullscreen();
-        } else if (element.msRequestFullscreen) {
-            element.msRequestFullscreen();
-        }
-    };
+       window.enterFullScreen = function (elementId) {
+           const element = document.getElementById(elementId);
+           if (element.requestFullscreen) {
+               element.requestFullscreen();
+           } else if (element.mozRequestFullScreen) {
+               element.mozRequestFullScreen();
+           } else if (element.webkitRequestFullscreen) {
+               element.webkitRequestFullscreen();
+           } else if (element.msRequestFullscreen) {
+               element.msRequestFullscreen();
+           }
+       };
 
-    window.exitFullScreen = function () {
-        if (document.exitFullscreen) {
-            document.exitFullscreen();
-        } else if (document.mozCancelFullScreen) {
-            document.mozCancelFullScreen();
-        } else if (document.webkitExitFullscreen) {
-            document.webkitExitFullscreen();
-        } else if (document.msExitFullscreen) {
-            document.msExitFullscreen();
-        }
-    };
+       window.exitFullScreen = function () {
+           if (document.exitFullscreen) {
+               document.exitFullscreen();
+           } else if (document.mozCancelFullScreen) {
+               document.mozCancelFullScreen();
+           } else if (document.webkitExitFullscreen) {
+               document.webkitExitFullscreen();
+           } else if (document.msExitFullscreen) {
+               document.msExitFullscreen();
+           }
+       };
 
        function toast(title, subtitle, body) {
            const toastOptions = {
@@ -235,9 +236,9 @@
     [Parameter]
     public ClientWidget WidgetInfo { get; set; }
     [Parameter]
-    public EventCallback<string> SetAlertEvent { get; set; }
+    public EventCallback<AlertEventData> SetAlertEvent { get; set; }
     [Parameter]
-    public EventCallback<string> StopAlertEvent { get; set; }
+    public EventCallback<AlertEventData> StopAlertEvent { get; set; }
     private Timer timer;
     private int refreshIntervalInSeconds;
     DataTable table = new DataTable();
@@ -260,6 +261,7 @@
     public int? Level2 { get; set; }
     public int? Level3 { get; set; }
 
+    AlertEventData eventData;
 
     protected override async Task OnInitializedAsync()
     {
@@ -268,15 +270,23 @@
         table = Data.Success ? Data.Data : null;
         message = Data.Success ? Data.Message : "";
 
-       
-            //ColumnNames = Rows[0].Keys.ToList();
-            refreshIntervalInSeconds = WidgetInfo.WidgetInfo.REFRESHINTERVAL;
-            timer = new Timer(RefreshWidget, null, TimeSpan.Zero, TimeSpan.FromSeconds(refreshIntervalInSeconds));
 
-        
+        //ColumnNames = Rows[0].Keys.ToList();
+        refreshIntervalInSeconds = WidgetInfo.WidgetInfo.REFRESHINTERVAL;
+        timer = new Timer(RefreshWidget, null, TimeSpan.Zero, TimeSpan.FromSeconds(refreshIntervalInSeconds));
+
+
         setWarningLevels(WidgetInfo.WidgetInfo.ALARMAFTER);
 
         isLoading = false;
+        if (Data.Success)
+        {
+            eventData = new AlertEventData
+                {
+                    Message = WidgetInfo.WidgetInfo.NAME,
+                    Severity = WidgetInfo.WidgetInfo.SEVERITY
+                };
+        }
     }
 
     private async Task ToggleFullScreen()
@@ -345,7 +355,7 @@
         Level3 = Level1 * 3;
     }
 
-    private string ProcessWarning(string time,string groupname)
+    private string ProcessWarning(string time, string groupname)
     {
         DateTime currentTime = DateTime.Now;
         DateTime parsedTime = DateTime.ParseExact(time, "hh:mm:ss tt", CultureInfo.InvariantCulture);
@@ -371,7 +381,7 @@
         {
             if (!AlertSent)
             {
-                SetAlertEvent.InvokeAsync(WidgetInfo.WidgetInfo.NAME);
+                SetAlertEvent.InvokeAsync(eventData);
                 AlertSent = true;
             }
             return "blinking3-row";
