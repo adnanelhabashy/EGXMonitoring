@@ -81,6 +81,18 @@
                     </div>
                     <div class="input-group mb-3">
                         <div class="input-group-prepend">
+                            <span class="input-group-text">Tab To Place</span>
+                        </div>
+                        <InputSelect type="text" @bind-Value="WidgetInfo.WidgetInfo.TABID" class="form-control" placeholder="">
+                            <option value="1">During Session</option>
+                            <option value="2">End of Day </option>
+                            <option value="3">Running Procedures</option>
+                            <option value="4">Vetting</option>
+                        </InputSelect>
+                        <ValidationMessage class="validation-message" For="@(() => WidgetInfo.WidgetInfo.TABID)"></ValidationMessage>
+                    </div>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
                             <span class="input-group-text">Severity</span>
                         </div>
                         <InputSelect type="text" @bind-Value="WidgetInfo.WidgetInfo.SEVERITY" class="form-control" placeholder="">

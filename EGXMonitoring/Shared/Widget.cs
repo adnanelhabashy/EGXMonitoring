@@ -41,7 +41,9 @@ namespace EGXMonitoring.Shared
 
         [Required(ErrorMessage = "The Severity is required.")]
         public int? SEVERITY { get; set; }
-        
+        [Required(ErrorMessage = "The Severity is required.")]
+        public int? TABID { get; set; }
+
 
 
     }
