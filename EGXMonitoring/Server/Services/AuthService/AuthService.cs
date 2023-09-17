@@ -33,6 +33,11 @@ namespace EGXMonitoring.Server.Services.AuthService
                 response.Success = false;
                 response.Message = "wrong password";
             }
+            else if(user.ISACTIVE != 1)
+            {
+                response.Success = false;
+                response.Message = "User Not Active please refer to system admin to activate.";
+            }
             else
             {
                 response.Data = CreateToken(user);
@@ -118,27 +123,52 @@ namespace EGXMonitoring.Server.Services.AuthService
             return jwt;
         }
 
-        public async Task<ServiceResponse<bool>> ChangePassword(int UserId, string newPassword)
+        public async Task<ServiceResponse<bool>> ChangePassword(string  Uername, string newPassword)
         {
-            var user = await _context.Users.FindAsync(UserId);
-            if (user == null)
+            try
+            {
+                var user = await _context.Users.Where(U => U.USERNAME == Uername).FirstOrDefaultAsync();
+                if (user == null)
+                {
+                    return new ServiceResponse<bool>()
+                    {
+                        Data = false,
+                        Success = true,
+                        Message = "User not found"
+                    };
+                }
+                if(user.RESETPASSWORD != 1)
+                {
+                    return new ServiceResponse<bool>()
+                    {
+                        Data = false,
+                        Success = true,
+                        Message = "No Authorized to reset password please refer to Eng. Khairy, :)"
+                    };
+                }
+                CreatepasswordHash(newPassword, out byte[] passwordHash, out byte[] passwordSalt);
+                user.PASSWORDSALT = passwordSalt;
+                user.PASSWORDHASH = passwordHash;
+                user.RESETPASSWORD = 0;
+                _context.Update(user);
+                await _context.SaveChangesAsync();
+                return new ServiceResponse<bool>()
+                {
+                    Data = true,
+                    Success = true,
+                    Message = "Password has been changed"
+                };
+            }
+            catch(Exception ex)
             {
                 return new ServiceResponse<bool>()
                 {
                     Success = false,
-                    Message = "User not found"
+                    Data = false,
+                    Message = ex.Message
                 };
             }
-            CreatepasswordHash(newPassword, out byte[] passwordHash, out byte[] passwordSalt);
-            user.PASSWORDSALT = passwordSalt;
-            user.PASSWORDHASH = passwordHash;
-            await _context.SaveChangesAsync();
-            return new ServiceResponse<bool>()
-            {
-                Data = true,
-                Success = true,
-                Message = "Password has been changed"
-            };
+            
         }
     }
 }

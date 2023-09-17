@@ -86,8 +86,8 @@
                                 }
                             </Template>
                         </GridColumn>
-                        <GridColumn Field="@nameof(User.CREATEDON)" Title="Created on" Width="195px" />
-                        <GridColumn Field="@nameof(User.UPDATEDON)" Title="Updated on" Width="195px" />
+                        <GridColumn Field="@nameof(User.CREATEDON)" Title="Created on" Width="195px" Editable=false />
+                        <GridColumn Field="@nameof(User.UPDATEDON)" Title="Updated on" Width="195px" Editable =false />
                         <GridCommandColumn Width="260px">
                             <GridCommandButton Command="Edit" ThemeColor="@ThemeConstants.Button.ThemeColor.Primary">Edit</GridCommandButton>
                             <GridCommandButton Command="Delete">Delete</GridCommandButton>
@@ -165,7 +165,7 @@
                 ISACTIVE = user.ISACTIVE ? 1 : 0,
                 ISADMIN = user.ISADMIN ? 1 : 0,
                 CREATEDON = user.CREATEDON,
-                UPDATEDON = user.UPDATEDON,
+                UPDATEDON =DateTime.Now,
                 RESETPASSWORD = user.RESETPASSWORD ? 1 : 0
             };
         var result = await UserService.UpdateUser(DtUser);
@@ -203,7 +203,7 @@
                 PASSWORDSALT = user.PASSWORDSALT,
                 ISACTIVE = user.ISACTIVE ? 1 : 0,
                 ISADMIN = user.ISADMIN ? 1 : 0,
-                CREATEDON = user.CREATEDON,
+                CREATEDON = DateTime.Now,
                 UPDATEDON = user.UPDATEDON,
                 RESETPASSWORD = user.RESETPASSWORD ? 1 : 0
             };

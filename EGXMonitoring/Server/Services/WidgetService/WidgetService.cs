@@ -200,11 +200,15 @@ namespace EGXMonitoring.Server.Services.WidgetService
                 result.Data = new List<ClientWidget>();
                 foreach (var widgetInfo in widgetsInfo)
                 {
+                    OracleConnectionStringBuilder builder = new OracleConnectionStringBuilder(Decrypt(widgetInfo.CONNCETIONSTRINGHASH));
+                    var connectionString = Decrypt(widgetInfo.CONNCETIONSTRINGHASH);
                     result.Data.Add(new ClientWidget()
                     {
                         WidgetInfo = widgetInfo,
-                        ConnectionString = Decrypt(widgetInfo.CONNCETIONSTRINGHASH)
-                    });
+                        ConnectionString = Decrypt(widgetInfo.CONNCETIONSTRINGHASH),
+                        User = builder.UserID,
+                        HOST = builder.DataSource
+                });
                 }
 
                 return result;
@@ -219,7 +223,7 @@ namespace EGXMonitoring.Server.Services.WidgetService
                 };
             }
         }
-
+   
         public async Task<ServiceResponse<ClientWidget>> UpdateWidget(ClientWidget widget)
         {
             try

@@ -44,11 +44,11 @@ namespace EGXMonitoring.Server.Controllers
             else { return Ok(response); }
         }
 
-        [HttpPost("changepassword"), Authorize]
-        public async Task<ActionResult<ServiceResponse<bool>>> ChangePassword([FromBody] UserChangePassword newPassword)
+        [HttpPost("changepassword")]
+        public async Task<ActionResult<ServiceResponse<bool>>> ChangePassword([FromBody] UserResetPassword newPassword)
         {
             var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            var response = await _authService.ChangePassword(int.Parse(userId), newPassword.Password);
+            var response = await _authService.ChangePassword(newPassword.Username, newPassword.Password);
 
             if (!response.Success)
             {

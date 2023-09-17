@@ -10,7 +10,7 @@ namespace EGXMonitoring.Client.Services.AuthService
         {
             _http = http;
         }
-        public async Task<ServiceResponse<bool>> ChangePassword(UserChangePassword request)
+        public async Task<ServiceResponse<bool>> ChangePassword(UserResetPassword request)
         {
             var result = await _http.PostAsJsonAsync("api/auth/changepassword", request);
             return await result.Content.ReadFromJsonAsync<ServiceResponse<bool>>();

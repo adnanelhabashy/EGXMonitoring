@@ -14,6 +14,9 @@ namespace EGXMonitoring.Client.Services.WidgetService
         {
             _http = http;
         }
+
+        public event Action OnChange;
+
         public async Task<ServiceResponse<List<ClientWidget>>> GetWidgetsInfo()
         {
             var widgets = await _http.GetFromJsonAsync<ServiceResponse<List<ClientWidget>>>("api/Widgets");
@@ -61,6 +64,10 @@ namespace EGXMonitoring.Client.Services.WidgetService
         {
             var result = await _http.PostAsJsonAsync("api/Widgets/addwidget", widget);
             var data = await result.Content.ReadFromJsonAsync<ServiceResponse<ClientWidget>>();
+            if (data.Success)
+            {
+                OnChange.Invoke();
+            }
             return data;
         }
 
@@ -68,6 +75,10 @@ namespace EGXMonitoring.Client.Services.WidgetService
         {
             var result = await _http.PostAsJsonAsync("api/Widgets/updatewidget", widget);
             var data = await result.Content.ReadFromJsonAsync<ServiceResponse<ClientWidget>>();
+            if (data.Success)
+            {
+                OnChange.Invoke();
+            }
             return data;
         }
 
@@ -75,6 +86,10 @@ namespace EGXMonitoring.Client.Services.WidgetService
         {
             var result = await _http.PostAsJsonAsync("api/Widgets/deletewidget", widget);
             var data = await result.Content.ReadFromJsonAsync<ServiceResponse<ClientWidget>>();
+            if (data.Success)
+            {
+                OnChange.Invoke();
+            }
             return data;
         }
 

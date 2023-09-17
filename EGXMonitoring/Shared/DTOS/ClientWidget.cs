@@ -17,5 +17,7 @@ namespace EGXMonitoring.Shared.DTOS
 
         [Required(ErrorMessage = "The Connection String is required.")]
         public string ConnectionString { get; set; } = string.Empty;
+        public string User { get; set; } = string.Empty;
+        public string HOST { get; set; } = string.Empty;
     }
 }

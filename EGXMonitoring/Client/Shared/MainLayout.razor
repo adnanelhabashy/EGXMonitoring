@@ -1,7 +1,7 @@
 ﻿@inherits LayoutComponentBase
 @inject NavigationManager NavManager
 
-@if (NavManager.Uri.ToLower().Contains("login"))
+@if (NavManager.Uri.ToLower().Contains("login") || NavManager.Uri.ToLower().Contains("resetpassword"))
 {
     <div class="hold-transition login-page">
         <div class="login-box">
@@ -16,16 +16,11 @@ else
     <div class="page">
         <SideBar />
         <Header />
-
-
         <main>
-
-
             <article class="content-wrapper">
                 @Body
             </article>
         </main>
-
         <Footer />
     </div>
 

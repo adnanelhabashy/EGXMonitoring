@@ -1,5 +1,6 @@
 ﻿using EGXMonitoring.Shared.DTOS;
 using Microsoft.EntityFrameworkCore;
+using System.Security.Cryptography;
 
 namespace EGXMonitoring.Server.Services.UsersService
 {
@@ -31,6 +32,9 @@ namespace EGXMonitoring.Server.Services.UsersService
         {
             try
             {
+                CreatepasswordHash("123456", out byte[] passwordHash, out byte[] passwordSalt);
+                user.PASSWORDSALT = passwordSalt;
+                user.PASSWORDHASH = passwordHash;
                 await _context.Users.AddAsync(user);
                 await _context.SaveChangesAsync();
                 return new ServiceResponse<User>()
@@ -43,6 +47,15 @@ namespace EGXMonitoring.Server.Services.UsersService
             catch (Exception ex) 
             {
                 return new ServiceResponse<User>() { Data = null, Success = false, Message = ex.Message };
+            }
+        }
+
+        private void CreatepasswordHash(string password, out byte[] passwordHash, out byte[] passwordSalt)
+        {
+            using (var hmac = new HMACSHA512())
+            {
+                passwordSalt = hmac.Key;
+                passwordHash = hmac.ComputeHash(System.Text.Encoding.UTF8.GetBytes(password));
             }
         }
 

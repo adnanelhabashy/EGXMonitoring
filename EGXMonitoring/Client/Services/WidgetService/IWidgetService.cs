@@ -5,6 +5,7 @@ namespace EGXMonitoring.Client.Services.WidgetService
 {
     public interface IWidgetService
     {
+        event Action OnChange;
         Task<ServiceResponse<List<ClientWidget>>> GetWidgetsInfo();
         Task<ServiceResponse<DataTable>> GetWidgetData(ClientWidget widget);
         Task<ServiceResponse<ClientWidget>> AddWidget(ClientWidget widget);

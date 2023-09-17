@@ -2,7 +2,7 @@
 @inject IWidgetService WidgetService
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
-
+@implements IDisposable
 
 <PageTitle>Widget Managment</PageTitle>
 <h3>Widget Managment</h3>
@@ -40,10 +40,12 @@ else
                         var widget = syncWidgets[index];
                         <div class="col-lg-2 col-6">
                             <!-- small card -->
-                            <div class="small-box bg-info">
+                            <div class="small-box @(widget.WidgetInfo.SEVERITY == 1?"bg-info":"bg-warning") ">
                                 <div class="inner">
                                     <h3>@widget.WidgetInfo.NAME</h3>
-                                    <p>@widget.WidgetInfo.DESCRIPTION</p>
+                                    <p><strong>Description : </strong>@widget.WidgetInfo.DESCRIPTION</p>
+                                    <p><strong>Tab : </strong>@GetTabName(@widget.WidgetInfo.TABID)</p>
+                                    <p style="@(widget.WidgetInfo.SEVERITY == 2?"color:red;":"")"><strong>Severity : </strong>@(widget.WidgetInfo.SEVERITY == 1 ? "Medium" : "High")</p>
                                 </div>
                                 <div class="icon">
                                     <i class="fas fa-chart-pie"></i>
@@ -53,7 +55,7 @@ else
                                 </a>
                             </div>
                         </div>
-                        <EditWidgetModal StateChanged="OnStateChanged" WidgetInfo="widget"></EditWidgetModal>
+                        <EditWidgetModal WidgetInfo="widget"></EditWidgetModal>
                     }
                 }
             </div>
@@ -84,7 +86,7 @@ else
 }
 else
 {
-    if(statusWidgets.Count > 0 )
+    if (statusWidgets.Count > 0)
     {
         @for (int row = 0; row < rowCount; row++)
         {
@@ -97,10 +99,12 @@ else
                         var widget = statusWidgets[index];
                         <div class="col-lg-2 col-6">
                             <!-- small card -->
-                            <div class="small-box bg-info">
+                            <div class="small-box @(widget.WidgetInfo.SEVERITY == 1?"bg-info":"bg-warning") ">
                                 <div class="inner">
                                     <h3>@widget.WidgetInfo.NAME</h3>
                                     <p>@widget.WidgetInfo.DESCRIPTION</p>
+                                    <p>Tab : @GetTabName(@widget.WidgetInfo.TABID)</p>
+                                    <p style="@(widget.WidgetInfo.SEVERITY == 2?"color:red;":"")"><strong>Severity : </strong>@(widget.WidgetInfo.SEVERITY == 1 ? "Medium" : "High")</p>
                                 </div>
                                 <div class="icon">
                                     <i class="fas fa-chart-pie"></i>
@@ -110,7 +114,7 @@ else
                                 </a>
                             </div>
                         </div>
-                        <EditWidgetModal StateChanged="OnStateChanged" WidgetInfo="widget"></EditWidgetModal>
+                        <EditWidgetModal WidgetInfo="widget"></EditWidgetModal>
                     }
                 }
             </div>
@@ -135,6 +139,7 @@ else
     List<ClientWidget> syncWidgets = new List<ClientWidget>();
     List<ClientWidget> statusWidgets = new List<ClientWidget>();
     private bool isLoading = true;
+    private bool isSubscribed;
     protected override async Task OnInitializedAsync()
     {
         isLoading = true;
@@ -144,11 +149,51 @@ else
         syncWidgets = WidgetInfo.Data.Where(w => w.WidgetInfo.WIDGETTYPE == 1).ToList();
         statusWidgets = WidgetInfo.Data.Where(w => w.WidgetInfo.WIDGETTYPE == 2).ToList();
         isLoading = false;
+
+        WidgetService.OnChange += HandleDataChanged;
+        isSubscribed = true;
     }
 
-    private void OnStateChanged(bool newState)
+    private void HandleDataChanged()
     {
-         StateHasChanged();
+        // Update component state or perform other logic
+
+        // Invoke JavaScript to reload the page
+        JSRuntime.InvokeVoidAsync("location.reload");
+    }
+
+    protected override void OnInitialized()
+    {
+        WidgetService.OnChange += HandleDataChanged;
+        isSubscribed = true;
+    }
+
+    public void Dispose()
+    {
+        if (isSubscribed)
+        {
+            // Unsubscribe from the event when the component is disposed
+            WidgetService.OnChange -= HandleDataChanged;
+            isSubscribed = false;
+        }
+    }
+
+    private string GetTabName(int? TabID)
+    {
+        switch (TabID)
+        {
+            case 1:
+                return "Durring Session";
+               
+            case 2:
+                return "End Of Day";
+            case 3:
+                return "Running Procedures";
+            case 4:
+                return "Vetting";
+            default:
+                return "";
+        }
     }
 }
 
