@@ -1,8 +1,13 @@
 ﻿using Blazored.LocalStorage;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
+using System.Globalization;
+using System;
+using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Security.Claims;
 using System.Text.Json;
+using Telerik.Blazor.Components.Editor;
 
 namespace EGXMonitoring.Client
 {
@@ -10,11 +15,13 @@ namespace EGXMonitoring.Client
     {
         private readonly ILocalStorageService _localStorageService;
         private readonly HttpClient _http;
+        private readonly NavigationManager _navigationManager;
 
-        public CustomAuthStateProvider(ILocalStorageService localStorageService, HttpClient http)
+        public CustomAuthStateProvider(ILocalStorageService localStorageService, HttpClient http, NavigationManager navigationManager)
         {
             _localStorageService = localStorageService;
             _http = http;
+            _navigationManager = navigationManager;
         }
 
         public override async Task<AuthenticationState> GetAuthenticationStateAsync()
@@ -36,7 +43,26 @@ namespace EGXMonitoring.Client
                         // Add the admin claim to the identity
                         identity.AddClaim(new Claim(ClaimTypes.Role, "Admin"));
                     }
+                    if (!await _localStorageService.ContainKeyAsync("expiry"))
+                    {
+                        await _localStorageService.SetItemAsStringAsync("expiry", GetExpiryDateTime(claims));
+
+                    }
+                    DateTime expiry ;
+                    string format = "dd/MM/yyyy hh:mm:ss tt";
+                    var tokenExpiry = await _localStorageService.GetItemAsStringAsync("expiry");
+                    tokenExpiry = tokenExpiry.Replace("ص", "AM");
+                    tokenExpiry = tokenExpiry.Replace("م", "PM");
+                    DateTime.TryParseExact(tokenExpiry, format, CultureInfo.InvariantCulture, DateTimeStyles.None, out expiry);
+                    if (DateTime.Now > expiry)
+                    {
+                        await _localStorageService.RemoveItemAsync("expiry");
+                        await _localStorageService.RemoveItemAsync("authToken");
+                        _navigationManager.NavigateTo("/login");
+                    }
+
                     _http.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", authToken.Replace("\"", ""));
+
                 }
                 catch
                 {
@@ -74,6 +100,12 @@ namespace EGXMonitoring.Client
         private bool IsAdmin(IEnumerable<Claim> claims)
         {
             return claims.Any(c => c.Type == ClaimTypes.Role && c.Value == "Admin");
+        }
+
+        private string GetExpiryDateTime(IEnumerable<Claim> claims)
+        {
+            Claim expirationClaim = claims.FirstOrDefault(c => c.Type == ClaimTypes.Expiration);
+            return expirationClaim?.Value;
         }
 
     }

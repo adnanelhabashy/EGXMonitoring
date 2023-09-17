@@ -99,6 +99,7 @@ namespace EGXMonitoring.Server.Services.AuthService
             {
                 new Claim(ClaimTypes.NameIdentifier,user.ID.ToString()),
                 new Claim(ClaimTypes.Name,user.USERNAME),
+                new Claim(ClaimTypes.Expiration, DateTime.Now.AddDays(1).ToString())
             };
 
             if (user.ISADMIN == 1)
