@@ -1,10 +1,14 @@
 ﻿@page "/"
 @inject IWidgetService WidgetService
+@inject ISoundService SoundService
 @inject IJSRuntime jsRuntime
 @inject AuthenticationStateProvider _AuthProvider
+
 @using System.Security.Claims
 @using System.Text.Json
+
 @attribute [Authorize]
+
 <link rel="stylesheet" href="plugins/toastr/toastr.min.css">
 <AuthorizeView>
     <style>
@@ -24,7 +28,7 @@
         }
 
     </style>
-    
+
     @if (WidgetInfo.Data != null)
     {
         <div style="display: @(ShowAlert ? "block" : "none")">
@@ -63,7 +67,7 @@
                         <div class="tab-content" id="custom-tabs-five-tabContent">
                             <div class="tab-pane fade show active" id="during-seesion" role="tabpanel" aria-labelledby="custom-tabs-five-overlay-tab">
                                 <div class="overlay-wrapper">
-                         
+
                                     @if (isLoading)
                                     {
                                         <div class="overlay"><i class="fas fa-3x fa-sync-alt fa-spin"></i><div class="text-bold pt-2">Loading...</div></div>
@@ -246,7 +250,7 @@
                                             <button class="custom-button" @onclick='() => SaveLayout("vetting")'>Save Layout</button>
                                         </div>
                                         <TelerikTileLayout @ref="@TileVettingInstance"
-                                                           class="dark-tile-layout" 
+                                                           class="dark-tile-layout"
                                                            Columns="12"
                                                            ColumnWidth="100%"
                                                            RowHeight="100%"
@@ -361,6 +365,7 @@
             alert.style.display = 'none';
             dismissButton.style.display = 'none';
         }
+
         function sendNotification(title, options) {
             if (Notification.permission === 'granted') {
                 new Notification(title, options);
@@ -372,7 +377,7 @@
 
 
     public ServiceResponse<List<ClientWidget>> WidgetInfo { get; set; } = new ServiceResponse<List<ClientWidget>>();
-    private List<string> AlertWidgets = new List<string>();
+
     public bool ShowAlert { get; set; } = false;
     public int ActiveTabIndex { get; set; } = 1;
     public bool isLoading { get; set; } = false;
@@ -389,9 +394,7 @@
         isLoading = true;
         WidgetInfo = await WidgetService.GetWidgetsInfo();
 
-        //await jsRuntime.InvokeVoidAsync("setAlert");
-        //bool isPlaying = await jsRuntime.InvokeAsync<bool>("isAlertOn");
-        //bool isPlaying = await jsRuntime.InvokeAsync<bool>("isAlertOn");
+
 
 
         if (await JSRuntime.InvokeAsync<string>("Notification.requestPermission") != "granted")
@@ -402,11 +405,19 @@
         {
             // await SendNotification();
         }
+
+
         isLoading = false;
         var authenticationState = await _AuthProvider.GetAuthenticationStateAsync();
         var user = authenticationState.User;
         UserId = Int32.Parse(user.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)?.Value);
         await GetTabStates();
+
+        //sound event subscribtions
+        SoundService.AlertTurnOn += async (args) => await SetAlert(args);
+        SoundService.HighAlertTurnOn += async (args) => await SetAlert(args);
+        SoundService.AlertTurnOff += async (args) => await StopAlert(args);
+        SoundService.HighAlertTurnOff += async (args) => await StopAlert(args);
     }
     private void SaveLayout(string tabName)
     {
@@ -421,13 +432,13 @@
                 layout.TABSTATE = System.Text.Json.JsonSerializer.Serialize(TileDuringSessionInstance.GetState());
                 break;
             case "end-of-day":
-                layout.TABSTATE =  System.Text.Json.JsonSerializer.Serialize(TileEndOfDayInstance.GetState());
+                layout.TABSTATE = System.Text.Json.JsonSerializer.Serialize(TileEndOfDayInstance.GetState());
                 break;
             case "running-procedures":
-                layout.TABSTATE =  System.Text.Json.JsonSerializer.Serialize(TileRunningProceduresInstance.GetState());
+                layout.TABSTATE = System.Text.Json.JsonSerializer.Serialize(TileRunningProceduresInstance.GetState());
                 break;
             case "vetting":
-                layout.TABSTATE =  System.Text.Json.JsonSerializer.Serialize(TileVettingInstance.GetState());
+                layout.TABSTATE = System.Text.Json.JsonSerializer.Serialize(TileVettingInstance.GetState());
                 break;
 
         }
@@ -440,35 +451,33 @@
     {
         var response = await WidgetService.GetTabsLayout();
         List<TabLayouts> tabLayouts = response.Data;
-        foreach(var tab in tabLayouts)
+        foreach (var tab in tabLayouts)
         {
             switch (tab.TABNAME)
             {
                 case "during-seesion":
                     if (TileDuringSessionInstance != null)
-                    TileDuringSessionInstance.SetState(System.Text.Json.JsonSerializer.Deserialize<TileLayoutState>(tab.TABSTATE));
+                        TileDuringSessionInstance.SetState(System.Text.Json.JsonSerializer.Deserialize<TileLayoutState>(tab.TABSTATE));
                     break;
                 case "end-of-day":
                     if (TileEndOfDayInstance != null)
-                    TileEndOfDayInstance.SetState(System.Text.Json.JsonSerializer.Deserialize<TileLayoutState>(tab.TABSTATE));
+                        TileEndOfDayInstance.SetState(System.Text.Json.JsonSerializer.Deserialize<TileLayoutState>(tab.TABSTATE));
                     break;
                 case "running-procedures":
                     if (TileRunningProceduresInstance != null)
-                    TileRunningProceduresInstance.SetState(System.Text.Json.JsonSerializer.Deserialize<TileLayoutState>(tab.TABSTATE));
+                        TileRunningProceduresInstance.SetState(System.Text.Json.JsonSerializer.Deserialize<TileLayoutState>(tab.TABSTATE));
                     break;
                 case "vetting":
-                    if(TileVettingInstance != null )
-                    TileVettingInstance.SetState(System.Text.Json.JsonSerializer.Deserialize<TileLayoutState>(tab.TABSTATE));
+                    if (TileVettingInstance != null)
+                        TileVettingInstance.SetState(System.Text.Json.JsonSerializer.Deserialize<TileLayoutState>(tab.TABSTATE));
                     break;
             }
         }
     }
 
-
-
     private async Task SendNotification(string Body)
     {
-        await JSRuntime.InvokeVoidAsync("sendNotification", "Notification Title", new
+        await JSRuntime.InvokeVoidAsync("sendNotification", "Major Error Alert", new
         {
             body = Body,
             icon = "/images/DangerIcon.png",
@@ -477,58 +486,39 @@
             requireInteraction = true,
         });
     }
+
     private async Task SetAlert(AlertEventData eventData)
     {
         bool isPlaying = await jsRuntime.InvokeAsync<bool>("isAlertOn", eventData.Severity);
-        if (!AlertWidgets.Contains(eventData.Message))
+        if (!isPlaying)
         {
-            AlertWidgets.Add(eventData.Message);
-            if (!isPlaying)
-            {
-                await jsRuntime.InvokeVoidAsync("setAlert", eventData.Severity);
-            }
-        }
-        else
-        {
-            if (!isPlaying)
-            {
-                await jsRuntime.InvokeVoidAsync("setAlert", eventData.Severity);
-            }
+            await jsRuntime.InvokeVoidAsync("setAlert", eventData.Severity);
         }
         if (eventData.Severity == 2 && !ShowAlert)
         {
             ShowAlert = true;
+            StateHasChanged();
             await SendNotification("There is an urgent error in the (" + eventData.Message + ") widget");
         }
     }
     private async Task StopAlert(AlertEventData eventData)
     {
         bool isPlaying = await jsRuntime.InvokeAsync<bool>("isAlertOn", eventData.Severity);
-        if (!AlertWidgets.Contains(eventData.Message))
+        if (isPlaying)
         {
-            if (isPlaying && AlertWidgets.Count == 0)
-            {
-                await jsRuntime.InvokeVoidAsync("stopAlert", eventData.Severity);
-
-            }
+            await jsRuntime.InvokeVoidAsync("stopAlert", eventData.Severity);
         }
-        else
+        if (eventData.Severity == 2 && ShowAlert)
         {
-            AlertWidgets.Remove(eventData.Message);
-            if (isPlaying && AlertWidgets.Count == 0)
-            {
-                await jsRuntime.InvokeVoidAsync("stopAlert", eventData.Severity);
-
-            }
-            if (eventData.Severity == 2 && ShowAlert)
-            {
-                ShowAlert = false;
-            }
+            ShowAlert = false;
+            StateHasChanged();
         }
     }
-
-
-
-
-
 }
+
+
+
+
+
+
+

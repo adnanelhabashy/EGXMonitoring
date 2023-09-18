@@ -1,5 +1,7 @@
 ﻿@inject IWidgetService WidgetService
 @inject IJSRuntime JSRuntime
+@inject ISoundService SoundService
+
 @using Microsoft.JSInterop
 @using System.Globalization
 @using System.Data
@@ -106,10 +108,17 @@
                                         if (SearchErrorTime(@group.Key))
                                         {
                                             RemoveErrorTime(@group.Key);
-                                            if (AlertSent && ErrorTime.Count == 0)
+                                            if (ErrorTime.Count == 0)
                                             {
-                                                StopAlertEvent.InvokeAsync(eventData);
-                                                AlertSent = false;
+                                                if (WidgetInfo.WidgetInfo.SEVERITY == 1)
+                                                {
+                                                    SoundService.StopAlert(eventData);
+                                                }
+                                                if (WidgetInfo.WidgetInfo.SEVERITY == 2)
+                                                {
+                                                    SoundService.StopHighAlert(eventData);
+                                                }
+                                               
                                             }
                                         }
                                         <tr>
@@ -118,8 +127,6 @@
                                                 <label style="margin: 20px;">
                                                     <input type="checkbox" @onclick="()=> IgnoreWarning(group.Key)" checked="@IsWarningIgnored(group.Key)"> Avoid Check
                                                 </label>
-
-
                                             </td>
                                         </tr>
                                         @foreach (DataRow row in group)
@@ -242,8 +249,6 @@
 
     ServiceResponse<DataTable> Data = new ServiceResponse<DataTable>();
 
-    private bool AlertSent = false;
-    private bool AlertStopped = false;
     AlertEventData eventData;
 
     protected override async Task OnInitializedAsync()
@@ -353,11 +358,22 @@
 
         if (IsWarningIgnored(groupname))
         {
-            return ""; // Return empty string to disable warning styling
+            if ((ErrorTime.Count - IgnoredWarnings.Where(kv => kv.Value).Count()) == 0)
+            {
+                if (WidgetInfo.WidgetInfo.SEVERITY == 1)
+                {
+                    SoundService.StopAlert(eventData);
+                }
+                if (WidgetInfo.WidgetInfo.SEVERITY == 2)
+                {
+                    SoundService.StopHighAlert(eventData);
+                }
+            }
+
         }
         if (timeDifferenceMilliseconds >= 0 && timeDifferenceMilliseconds <= Level1)
         {
-            
+
             return "blinking1-row";
         }
         else if (timeDifferenceMilliseconds >= Level1 && timeDifferenceMilliseconds <= Level2)
@@ -370,12 +386,18 @@
         }
         else
         {
-            if (!AlertSent )
+            if ((ErrorTime.Count - IgnoredWarnings.Where(kv => kv.Value).Count()) != 0)
             {
-               
-                SetAlertEvent.InvokeAsync(eventData);
-                AlertSent = true;
+                if (WidgetInfo.WidgetInfo.SEVERITY == 1)
+                {
+                    SoundService.SetAlert(eventData);
+                }
+                if (WidgetInfo.WidgetInfo.SEVERITY == 2)
+                {
+                    SoundService.SetHighAlert(eventData);
+                }
             }
+
             return "blinking3-row";
         }
     }

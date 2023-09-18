@@ -4,6 +4,7 @@ global using System.Net.Http.Json;
 global using EGXMonitoring.Client.Services.AuthService;
 global using EGXMonitoring.Client.Services.WidgetService;
 global using EGXMonitoring.Client.Services.UsersService;
+global using EGXMonitoring.Client.Services.SoundService;
 global using Microsoft.AspNetCore.Components.Authorization;
 
 using Blazored.LocalStorage;
@@ -23,6 +24,7 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.
 builder.Services.AddScoped<IWidgetService, WidgetService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ISoundService, SoundService>();
 builder.Services.AddOptions();
 builder.Services.AddAuthorizationCore(options =>
 {

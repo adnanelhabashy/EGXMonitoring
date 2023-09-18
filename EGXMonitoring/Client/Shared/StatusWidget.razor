@@ -1,5 +1,7 @@
 ﻿@inject IWidgetService WidgetService
 @inject IJSRuntime JSRuntime
+@inject ISoundService SoundService
+
 @using Microsoft.JSInterop
 @using System.Globalization
 @using System.Data
@@ -111,10 +113,16 @@
                                     if (SearchErrorTime(row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString()))
                                     {
                                         RemoveErrorTime(row[WidgetInfo.WidgetInfo.GROUPCOLUMN].ToString());
-                                        if (AlertSent && ErrorTime.Count == 0)
+                                        if (ErrorTime.Count == 0)
                                         {
-                                            StopAlertEvent.InvokeAsync(eventData);
-                                            AlertSent = false;
+                                            if (WidgetInfo.WidgetInfo.SEVERITY == 1)
+                                            {
+                                                SoundService.StopAlert(eventData);
+                                            }
+                                            if (WidgetInfo.WidgetInfo.SEVERITY == 2)
+                                            {
+                                                SoundService.StopHighAlert(eventData);
+                                            }
                                         }
                                     }
                                 }
@@ -254,8 +262,6 @@
     Dictionary<string, bool> IgnoredWarnings = new Dictionary<string, bool>();
 
     ServiceResponse<DataTable> Data = new ServiceResponse<DataTable>();
-    private bool AlertSent = false;
-
 
     public int? Level1 { get; set; }
     public int? Level2 { get; set; }
@@ -363,7 +369,18 @@
         long timeDifferenceMilliseconds = (long)timeDifference.TotalMilliseconds * -1;
         if (IsWarningIgnored(groupname))
         {
-            return ""; // Return empty string to disable warning styling
+            if ((ErrorTime.Count - IgnoredWarnings.Where(kv => kv.Value).Count()) == 0)
+            {
+                if (WidgetInfo.WidgetInfo.SEVERITY == 1)
+                {
+                    SoundService.StopAlert(eventData);
+                }
+                if (WidgetInfo.WidgetInfo.SEVERITY == 2)
+                {
+                    SoundService.StopHighAlert(eventData);
+                }
+            }
+
         }
         if (timeDifferenceMilliseconds >= 0 && timeDifferenceMilliseconds <= Level1)
         {
@@ -379,11 +396,18 @@
         }
         else
         {
-            if (!AlertSent)
+            if ((ErrorTime.Count - IgnoredWarnings.Where(kv => kv.Value).Count()) != 0)
             {
-                SetAlertEvent.InvokeAsync(eventData);
-                AlertSent = true;
+                if (WidgetInfo.WidgetInfo.SEVERITY == 1)
+                {
+                    SoundService.SetAlert(eventData);
+                }
+                if (WidgetInfo.WidgetInfo.SEVERITY == 2)
+                {
+                    SoundService.SetHighAlert(eventData);
+                }
             }
+           
             return "blinking3-row";
         }
     }
