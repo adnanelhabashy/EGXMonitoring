@@ -4,6 +4,8 @@ using EGXMonitoring.Server.Services.WidgetService;
 using EGXMonitoring.Shared.DTOS;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using EGXMonitoring.Server.HostedService;
+
 
 namespace EGXMonitoring.Server.Controllers
 {
@@ -13,10 +15,12 @@ namespace EGXMonitoring.Server.Controllers
     public class WidgetsController : ControllerBase
     {
         private readonly IWidgetService _widgetService;
+        private readonly IHostedService _HostedService;
 
-        public WidgetsController(IWidgetService widgetService)
+        public WidgetsController(IWidgetService widgetService,IHostedService hostedService)
         {
             _widgetService = widgetService;
+            _HostedService = hostedService;
         }
         [HttpGet]
         public async Task<ActionResult<ServiceResponse<List<ClientWidget>>>> GetWidgetInfo()
@@ -27,18 +31,18 @@ namespace EGXMonitoring.Server.Controllers
 
 
         [HttpPost("WidgetData")]
-        public  ActionResult<ServiceResponse<List<Dictionary<string, object>>>> GetWidgetData(ClientWidget widget)
+        public ActionResult<ServiceResponse<List<Dictionary<string, object>>>> GetWidgetData(ClientWidget widget)
         {
             ServiceResponse<List<Dictionary<string, object>>> data = new ServiceResponse<List<Dictionary<string, object>>>();
             if (widget.WidgetInfo.WIDGETTYPE == 1)
             {
-                 data = _widgetService.GetWidgetData(widget);
+                data = _widgetService.GetWidgetData(widget);
             }
             else if (widget.WidgetInfo.WIDGETTYPE == 2)
             {
-                 data = _widgetService.GetStatusWidgetData(widget);
+                data = _widgetService.GetStatusWidgetData(widget);
             }
-               
+
             return Ok(data);
         }
 
@@ -74,6 +78,16 @@ namespace EGXMonitoring.Server.Controllers
         {
             var response = await _widgetService.SetTabLayouts(Layouts);
             return Ok(response);
+        }
+
+
+        [HttpPost("restartBackGroundService"), AllowAnonymous]
+        public async Task<IActionResult> RestartHostedService()
+        {
+                await _HostedService.StopAsync(new System.Threading.CancellationToken());
+                await _HostedService.StartAsync(new System.Threading.CancellationToken());
+         
+            return Ok("Hosted service restart initiated.");
         }
 
     }
