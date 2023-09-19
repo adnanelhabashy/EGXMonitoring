@@ -66,8 +66,7 @@ namespace EGXMonitoring.Server.HostedService
             DataTable Data = new DataTable();
             Dictionary<string, DateTime> ErrorTime = new Dictionary<string, DateTime>();
             List<string> errors = new List<string>();
-            bool mailSent = false;
-            Console.WriteLine(widget.WidgetInfo.NAME + " -- before loop");
+
             List<MailEvent> mailEvents = new List<MailEvent>();
 
             while (!cancellationToken.IsCancellationRequested)
@@ -78,7 +77,6 @@ namespace EGXMonitoring.Server.HostedService
 
                 if (result.Success)
                 {
-                    Console.WriteLine(widget.WidgetInfo.NAME + " -- " + widget.WidgetInfo.REFRESHINTERVAL + " -- Check type 1 ");
 
                     var groupedData = Data.AsEnumerable()
                                 .GroupBy(row => row.Field<string>(widget.WidgetInfo.GROUPCOLUMN));
@@ -88,7 +86,6 @@ namespace EGXMonitoring.Server.HostedService
                         {
                             var lowestValue = group.Min(row => row.Field<string>(widget.WidgetInfo.VALUECOLMN));
                             string warningLevel = string.Empty;
-                            Console.WriteLine(widget.WidgetInfo.NAME + " -- " + lowestValue + " -- Lowest value");
                             if (!ErrorTime.ContainsKey(group.Key))
                             {
                                 ErrorTime[group.Key] = DateTime.Now;
@@ -109,9 +106,10 @@ namespace EGXMonitoring.Server.HostedService
                                             MailSent = true
                                         };
                                         mailEvents.Add(sentMail);
+                                        Console.WriteLine(widget.WidgetInfo.NAME + " Warning Level :" + warningLevel + " Mail Sent");
                                     }
-                                   
                                 }
+                                Console.WriteLine(widget.WidgetInfo.NAME + " Warning Level :" + warningLevel);
                             }
                             if (widget.WidgetInfo.CHECKTYPE == 2)
                             {
@@ -132,11 +130,12 @@ namespace EGXMonitoring.Server.HostedService
                                                 MailSent = true
                                             };
                                             mailEvents.Add(sentMail);
+                                            Console.WriteLine(widget.WidgetInfo.NAME + " Warning Level :" + warningLevel + " Mail Sent");
                                         }
                                     }
+                                    Console.WriteLine(widget.WidgetInfo.NAME + " Warning Level :" + warningLevel);
                                 }
                             }
-                            Console.WriteLine(widget.WidgetInfo.NAME + " -- Error time Captured - wanring level - " + warningLevel);
                         }
                         else
                         {
@@ -154,7 +153,6 @@ namespace EGXMonitoring.Server.HostedService
                 }
 
 
-                Console.WriteLine(widget.WidgetInfo.NAME + " -- " + widget.WidgetInfo.REFRESHINTERVAL + " -- Data Reriveied");
                 await System.Threading.Tasks.Task.Delay(widget.WidgetInfo.REFRESHINTERVAL * 1000, cancellationToken);
             }
         }
@@ -165,7 +163,9 @@ namespace EGXMonitoring.Server.HostedService
             DataTable Data = new DataTable();
             Dictionary<string, DateTime> ErrorTime = new Dictionary<string, DateTime>();
             List<string> errors = new List<string>();
-            bool mailSent = false;
+
+            List<MailEvent> mailEvents = new List<MailEvent>();
+
             while (!cancellationToken.IsCancellationRequested)
             {
                 var result = _WidgetService.GetStatusWidgetData(widget);
@@ -186,7 +186,25 @@ namespace EGXMonitoring.Server.HostedService
                             if (widget.WidgetInfo.CHECKTYPE == 1)
                             {
                                 warningLevel = ProcessWarning(ErrorTime[row[widget.WidgetInfo.VALUECOLMN].ToString()], row[widget.WidgetInfo.GROUPCOLUMN].ToString(), widget.WidgetInfo.ALARMAFTER);
-                                Console.WriteLine(widget.WidgetInfo.NAME + " -- Error time Captured - wanring level - " + warningLevel);
+                                if (warningLevel == "4")
+                                {
+                                    if (mailEvents.Where(m => m.GroupName == row[widget.WidgetInfo.VALUECOLMN].ToString() && m.MailSent == true).Count() == 0)
+                                    {
+                                        sendmail("adnan.ahmed@egx.com.eg", "error in " + widget.WidgetInfo.NAME + " in " + row[widget.WidgetInfo.VALUECOLMN].ToString() + " not in sync since " + ErrorTime[row[widget.WidgetInfo.VALUECOLMN].ToString()].ToString(), "error in " + widget.WidgetInfo.NAME + " in " + row[widget.WidgetInfo.VALUECOLMN].ToString());
+
+                                        MailEvent sentMail = new MailEvent()
+                                        {
+                                            GroupName = row[widget.WidgetInfo.VALUECOLMN].ToString(),
+                                            SentOn = DateTime.Now,
+                                            MailSent = true
+                                        };
+                                        mailEvents.Add(sentMail);
+                                        Console.WriteLine(widget.WidgetInfo.NAME + " Warning Level :" + warningLevel + " Mail Sent");
+
+                                    }
+                                    
+                                }
+                                Console.WriteLine(widget.WidgetInfo.NAME + " Warning Level :" + warningLevel);
                             }
                             if (widget.WidgetInfo.CHECKTYPE == 2)
                             {
@@ -194,18 +212,42 @@ namespace EGXMonitoring.Server.HostedService
                                 if (widget.WidgetInfo.AFTERTIME.HasValue && currentDateTime.TimeOfDay > widget.WidgetInfo.AFTERTIME.Value.TimeOfDay && currentDateTime.TimeOfDay < widget.WidgetInfo.ENDTIME.Value.TimeOfDay)
                                 {
                                     warningLevel = ProcessWarning(ErrorTime[row[widget.WidgetInfo.VALUECOLMN].ToString()], row[widget.WidgetInfo.GROUPCOLUMN].ToString(), widget.WidgetInfo.ALARMAFTER);
-                                    Console.WriteLine(widget.WidgetInfo.NAME + " -- Error time Captured - wanring level - " + warningLevel);
+                                    if (warningLevel == "4")
+                                    {
+                                        if (mailEvents.Where(m => m.GroupName == row[widget.WidgetInfo.VALUECOLMN].ToString() && m.MailSent == true).Count() == 0)
+                                        {
+                                            sendmail("adnan.ahmed@egx.com.eg", "error in " + widget.WidgetInfo.NAME + " in " + row[widget.WidgetInfo.VALUECOLMN].ToString() + " not in sync since " + ErrorTime[row[widget.WidgetInfo.VALUECOLMN].ToString()].ToString(), "error in " + widget.WidgetInfo.NAME + " in " + row[widget.WidgetInfo.VALUECOLMN].ToString());
+
+                                            MailEvent sentMail = new MailEvent()
+                                            {
+                                                GroupName = row[widget.WidgetInfo.VALUECOLMN].ToString(),
+                                                SentOn = DateTime.Now,
+                                                MailSent = true
+                                            };
+                                            mailEvents.Add(sentMail);
+                                            Console.WriteLine(widget.WidgetInfo.NAME + " Warning Level :" + warningLevel + " Mail Sent");
+
+                                        }
+                                        
+                                    }
+                                    Console.WriteLine(widget.WidgetInfo.NAME + " Warning Level :" + warningLevel);
                                 }
                             }
                         }
                         else
                         {
-                            ErrorTime = RemoveErrorTime(row[widget.WidgetInfo.VALUECOLMN].ToString(), ErrorTime);
+                            if (ErrorTime.ContainsKey(row[widget.WidgetInfo.VALUECOLMN].ToString()))
+                            {
+                                ErrorTime = RemoveErrorTime(row[widget.WidgetInfo.VALUECOLMN].ToString(), ErrorTime);
+                            }
+                            if (mailEvents.Where(m => m.GroupName == row[widget.WidgetInfo.VALUECOLMN].ToString() && m.MailSent == true).Count() > 0)
+                            {
+                                mailEvents.RemoveAll(m => m.GroupName == row[widget.WidgetInfo.VALUECOLMN].ToString());
+                            }
                         }
                     }
 
                 }
-                Console.WriteLine(widget.WidgetInfo.NAME + " -- " + widget.WidgetInfo.REFRESHINTERVAL);
                 await System.Threading.Tasks.Task.Delay(widget.WidgetInfo.REFRESHINTERVAL * 1000, cancellationToken);
             }
         }
