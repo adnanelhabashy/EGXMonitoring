@@ -47,7 +47,7 @@
 
                         <label class="col-sm-2 col-form-label">SQL Command</label>
                         <div class="col-sm-10">
-                            <InputText type="text" @bind-Value="WidgetInfo.WidgetInfo.SQLCOMMAND" class="form-control" placeholder="" />
+                            <InputText type="text" @bind-Value="WidgetInfo.WidgetInfo.SQLCOMMAND" class="form-control uppercase" placeholder="" />
                             <ValidationMessage For="@(() => WidgetInfo.WidgetInfo.SQLCOMMAND)"></ValidationMessage>
                         </div>
                     </div>
@@ -63,14 +63,14 @@
 
                         <label class="col-sm-2 col-form-label">Value Column</label>
                         <div class="col-sm-10">
-                            <InputText type="text" @bind-Value="WidgetInfo.WidgetInfo.VALUECOLMN" class="form-control" placeholder="" />
+                            <InputText type="text" @bind-Value="WidgetInfo.WidgetInfo.VALUECOLMN" class="form-control uppercase" placeholder="" />
                             <ValidationMessage For="@(() => WidgetInfo.WidgetInfo.VALUECOLMN)"></ValidationMessage>
                         </div>
                     </div>
                     <div class="form-group row">
                         <label class="col-sm-2 col-form-label">Group Column</label>
                         <div class="col-sm-10">
-                            <InputText type="text" @bind-Value="WidgetInfo.WidgetInfo.GROUPCOLUMN" class="form-control" placeholder="" />
+                            <InputText type="text" @bind-Value="WidgetInfo.WidgetInfo.GROUPCOLUMN" class="form-control uppercase" placeholder="" />
                             <ValidationMessage For="@(() => WidgetInfo.WidgetInfo.GROUPCOLUMN)"></ValidationMessage>
                         </div>
                     </div>
@@ -132,6 +132,107 @@
                             </div>
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Widget Color</label>
+                                <InputSelect type="text" @bind-Value="WidgetInfo.WidgetInfo.COLOR" class="custom-select" @onchange="HandleCheckTypeChange" placeholder="">
+                                    <option value="dark-tile-layout-card-Red" style="background-color: #F44336;">
+                                        Red
+                                        <span class="color-box"></span>
+                                    </option>
+                                    <option value="dark-tile-layout-card-Teal" style="background-color: #009688 ;">
+                                        Teal
+                                        <span class="color-box"></span>
+                                    </option>
+                                    <option value="dark-tile-layout-card-BlueGrey" style="background-color: #607D8B;">
+                                        Blue Grey
+                                        <span class="color-box"></span>
+                                    </option>
+                                    <option value="dark-tile-layout-card-Indigo" style="background-color: #3F51B5 ;">
+                                        Indigo
+                                        <span class="color-box"></span>
+                                    </option>
+                                    <option value="dark-tile-layout-card-Green" style="background-color: #4CAF50;">
+                                        Green
+                                        <span class="color-box"></span>
+                                    </option>
+                                    <option value="dark-tile-layout-card-DeepOrange" style="background-color: #FF5722;">
+                                        Deep Orange
+                                        <span class="color-box"></span>
+                                    </option>
+                                    <option value="dark-tile-layout-card-Purple" style="background-color: #9C27B0;">
+                                        Purple
+                                        <span class="color-box"></span>
+                                    </option>
+                                    <option value="dark-tile-layout-card-Lime" style="background-color:#CDDC39;">
+                                        Lime
+                                        <span class="color-box"></span>
+                                    </option>
+                                    <option value="dark-tile-layout-card-Cyan" style="background-color:#00BCD4;">
+                                        Cyan
+                                        <span class="color-box"></span>
+                                    </option>
+                                    <option value="dark-tile-layout-card-DeepPurple" style="background-color:#673AB7;">
+                                        Deep Purple
+                                        <span class="color-box"></span>
+                                    </option>
+                                    <option value="dark-tile-layout-card-Amber" style="background-color:#FFC107;">
+                                        Amber
+                                        <span class="color-box"></span>
+                                    </option>
+                                    <option value="dark-tile-layout-card-Blue" style="background-color:#2196F3;">
+                                        Blue
+                                        <span class="color-box"></span>
+                                    </option>
+                                </InputSelect>
+                                <ValidationMessage For="@(() => WidgetInfo.WidgetInfo.COLOR)"></ValidationMessage>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Widget Color</label>
+                                <InputSelect type="text" @bind-Value="WidgetInfo.WidgetInfo.FONTSIZE" class="custom-select" @onchange="HandleCheckTypeChange" placeholder="">
+                                    <option value="10">
+                                        10px
+                                    </option>
+                                    <option value="11">
+                                        11px
+                                    </option>
+                                    <option value="12">
+                                        12px
+                                    </option>
+                                    <option value="13">
+                                        13px
+                                    </option>
+                                    <option value="14">
+                                        14px
+                                    </option>
+                                    <option value="15">
+                                        15px
+                                    </option>
+                                    <option value="16">
+                                        16px
+                                    </option>
+                                    <option value="17">
+                                        17px
+                                    </option>
+                                    <option value="18">
+                                        18px
+                                    </option>
+                                    <option value="19">
+                                        19px
+                                    </option>
+                                    <option value="20">
+                                        20px
+                                    </option>
+                                </InputSelect>
+                                <ValidationMessage For="@(() => WidgetInfo.WidgetInfo.FONTSIZE)"></ValidationMessage>
+                            </div>
+                        </div>
+                    </div>
                     @if (showTimeInputs || WidgetInfo.WidgetInfo.CHECKTYPE == 2)
                     {
                         <div class="bootstrap-timepicker row">
@@ -156,35 +257,21 @@
         </div>
     </div>
 </div>
-<script>
 
-
-    function toastDanger(title, subtitle, body) {
-        const toastOptions = {
-            class: 'bg-danger',
-            title: title,
-            subtitle: subtitle,
-            body: body,
-            position: 'bottomLeft',
-            autohide: true,
-            delay: 10000,
-        };
-        $(document).Toasts('create', toastOptions);
+<style>
+    input[type="text"].uppercase {
+        text-transform: uppercase;
     }
-    function toastSuccess(title, subtitle, body) {
-        const toastOptions = {
-            class: 'bg-success',
-            title: title,
-            subtitle: subtitle,
-            body: body,
-            position: 'bottomLeft',
-            autohide: true,
-            delay: 10000,
-        };
-        $(document).Toasts('create', toastOptions);
-    }
-</script>
 
+    .color-box {
+        width: 20px;
+        height: 20px;
+        display: inline-block;
+        margin-left: 5px;
+        vertical-align: middle;
+        border: 1px solid #000;
+    }
+</style>
 @code {
     public ClientWidget? WidgetInfo { get; set; }
     private bool showTimeInputs = false;

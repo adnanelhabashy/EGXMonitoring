@@ -11,24 +11,74 @@
 
 <link rel="stylesheet" href="plugins/toastr/toastr.min.css">
 <AuthorizeView>
-    <style>
+<style>
         .dark-tile-layout {
             background-color: #454d55;
             color: white;
         }
 
-        .dark-tile-layout-card-Normal {
-            background-color: #004444;
+        .dark-tile-layout-card-Red {
+            background-color: #F44336;
             color: white;
         }
 
-        .dark-tile-layout-card-High {
-            background-color: #290D4A;
+        .dark-tile-layout-card-Teal {
+            background-color: #009688;
             color: white;
         }
 
-    </style>
+        .dark-tile-layout-card-BlueGrey {
+            background-color: #607D8B;
+            color: white;
+        }
 
+        .dark-tile-layout-card-Indigo {
+            background-color: #3F51B5;
+            color: white;
+        }
+
+        .dark-tile-layout-card-Green {
+            background-color: #4CAF50;
+            color: white;
+        }
+
+        .dark-tile-layout-card-DeepOrange {
+            background-color: #FF5722;
+            color: white;
+        }
+
+        .dark-tile-layout-card-Purple {
+            background-color: #9C27B0;
+            color: white;
+        }
+
+        .dark-tile-layout-card-Lime {
+            background-color: #CDDC39;
+            color: white;
+        }
+
+        .dark-tile-layout-card-Cyan {
+            background-color: #00BCD4;
+            color: white;
+        }
+
+        .dark-tile-layout-card-DeepPurple {
+            background-color: #673AB7;
+            color: white;
+        }
+
+        .dark-tile-layout-card-Amber {
+            background-color: #FFC107;
+            color: white;
+        }
+
+        .dark-tile-layout-card-Blue {
+            background-color: #2196F3;
+            ;
+            color: white;
+        }
+
+</style>
     @if (WidgetInfo.Data != null)
     {
         <div style="display: @(ShowAlert ? "block" : "none")">
@@ -90,9 +140,9 @@
                                                     {
                                                         @if (widget.WidgetInfo.WIDGETTYPE == 1)
                                                         {
-                                                            <TileLayoutItem class="@(widget.WidgetInfo.SEVERITY == 1?"dark-tile-layout-card-Normal":"dark-tile-layout-card-High")" ColSpan="3">
+                                                            <TileLayoutItem class="@(widget.WidgetInfo.COLOR != null?widget.WidgetInfo.COLOR:"dark-tile-layout")" ColSpan="3">
                                                                 <HeaderTemplate>
-                                                                    <h4 style="color:white;text-align:center ;height: 10px;">@(widget.WidgetInfo.CHECKTYPE == 1 ? widget.WidgetInfo.NAME : widget.WidgetInfo.NAME + " Starts Working at " + widget.WidgetInfo.AFTERTIME.Value.ToString("hh:mm tt"))</h4>
+                                                                    <h4 style="color:white;text-align:center ;height: 10px;"><strong>@(widget.WidgetInfo.CHECKTYPE == 1 ? widget.WidgetInfo.NAME : widget.WidgetInfo.NAME + " Starts Working at " + widget.WidgetInfo.AFTERTIME.Value.ToString("hh:mm tt"))</strong></h4>
                                                                 </HeaderTemplate>
                                                                 <Content>
                                                                     <SyncWidgetComponent SetAlertEvent="SetAlert" StopAlertEvent="StopAlert" WidgetInfo=@widget />
@@ -101,9 +151,9 @@
                                                         }
                                                         @if (widget.WidgetInfo.WIDGETTYPE == 2)
                                                         {
-                                                            <TileLayoutItem class="@(widget.WidgetInfo.SEVERITY == 1?"dark-tile-layout-card-Normal":"dark-tile-layout-card-High")" ColSpan="3">
+                                                            <TileLayoutItem class="@(widget.WidgetInfo.COLOR != null?widget.WidgetInfo.COLOR:"dark-tile-layout")" ColSpan="3">
                                                                 <HeaderTemplate>
-                                                                    <h4 style="color:white;text-align:center ;height: 10px;">@(widget.WidgetInfo.CHECKTYPE == 1 ? widget.WidgetInfo.NAME : widget.WidgetInfo.NAME + " Starts Working at " + widget.WidgetInfo.AFTERTIME.Value.ToString("hh:mm tt"))</h4>
+                                                                    <h4 style="color:white;text-align:center ;height: 10px;"><strong>@(widget.WidgetInfo.CHECKTYPE == 1 ? widget.WidgetInfo.NAME : widget.WidgetInfo.NAME + " Starts Working at " + widget.WidgetInfo.AFTERTIME.Value.ToString("hh:mm tt"))</strong></h4>
                                                                 </HeaderTemplate>
                                                                 <Content>
                                                                     <StatusWidget SetAlertEvent="SetAlert" StopAlertEvent="StopAlert" WidgetInfo=@widget />
@@ -148,9 +198,9 @@
                                                     {
                                                         @if (widget.WidgetInfo.WIDGETTYPE == 1)
                                                         {
-                                                            <TileLayoutItem class="@(widget.WidgetInfo.SEVERITY == 1?"dark-tile-layout-card-Normal":"dark-tile-layout-card-High")" ColSpan="3">
+                                                            <TileLayoutItem class="@(widget.WidgetInfo.COLOR != null?widget.WidgetInfo.COLOR:"dark-tile-layout")" ColSpan="3">
                                                                 <HeaderTemplate>
-                                                                    <h4 style="color:white;text-align:center ;height: 10px;">@(widget.WidgetInfo.CHECKTYPE == 1 ? widget.WidgetInfo.NAME : widget.WidgetInfo.NAME + " Starts Working at " + widget.WidgetInfo.AFTERTIME.Value.ToString("hh:mm tt"))</h4>
+                                                                    <h4 style="color:white;text-align:center ;height: 10px;"><strong>@(widget.WidgetInfo.CHECKTYPE == 1 ? widget.WidgetInfo.NAME : widget.WidgetInfo.NAME + " Starts Working at " + widget.WidgetInfo.AFTERTIME.Value.ToString("hh:mm tt"))</strong></h4>
                                                                 </HeaderTemplate>
                                                                 <Content>
                                                                     <SyncWidgetComponent SetAlertEvent="SetAlert" StopAlertEvent="StopAlert" WidgetInfo=@widget />
@@ -159,9 +209,9 @@
                                                         }
                                                         @if (widget.WidgetInfo.WIDGETTYPE == 2)
                                                         {
-                                                            <TileLayoutItem class="@(widget.WidgetInfo.SEVERITY == 1?"dark-tile-layout-card-Normal":"dark-tile-layout-card-High")" ColSpan="3">
+                                                            <TileLayoutItem class="@(widget.WidgetInfo.COLOR != null?widget.WidgetInfo.COLOR:"dark-tile-layout")" ColSpan="3">
                                                                 <HeaderTemplate>
-                                                                    <h4 style="color:white;text-align:center ;height: 10px;">@(widget.WidgetInfo.CHECKTYPE == 1 ? widget.WidgetInfo.NAME : widget.WidgetInfo.NAME + " Starts Working at " + widget.WidgetInfo.AFTERTIME.Value.ToString("hh:mm tt"))</h4>
+                                                                    <h4 style="color:white;text-align:center ;height: 10px;"><strong>@(widget.WidgetInfo.CHECKTYPE == 1 ? widget.WidgetInfo.NAME : widget.WidgetInfo.NAME + " Starts Working at " + widget.WidgetInfo.AFTERTIME.Value.ToString("hh:mm tt"))</strong></h4>
                                                                 </HeaderTemplate>
                                                                 <Content>
                                                                     <StatusWidget SetAlertEvent="SetAlert" StopAlertEvent="StopAlert" WidgetInfo=@widget />
@@ -205,9 +255,9 @@
                                                     {
                                                         @if (widget.WidgetInfo.WIDGETTYPE == 1)
                                                         {
-                                                            <TileLayoutItem class="@(widget.WidgetInfo.SEVERITY == 1?"dark-tile-layout-card-Normal":"dark-tile-layout-card-High")" ColSpan="3">
+                                                            <TileLayoutItem class="@(widget.WidgetInfo.COLOR != null?widget.WidgetInfo.COLOR:"dark-tile-layout")" ColSpan="3">
                                                                 <HeaderTemplate>
-                                                                    <h4 style="color:white;text-align:center ;height: 10px;">@(widget.WidgetInfo.CHECKTYPE == 1 ? widget.WidgetInfo.NAME : widget.WidgetInfo.NAME + " Starts Working at " + widget.WidgetInfo.AFTERTIME.Value.ToString("hh:mm tt"))</h4>
+                                                                    <h4 style="color:white;text-align:center ;height: 10px;"><strong>@(widget.WidgetInfo.CHECKTYPE == 1 ? widget.WidgetInfo.NAME : widget.WidgetInfo.NAME + " Starts Working at " + widget.WidgetInfo.AFTERTIME.Value.ToString("hh:mm tt"))</strong></h4>
                                                                 </HeaderTemplate>
                                                                 <Content>
                                                                     <SyncWidgetComponent SetAlertEvent="SetAlert" StopAlertEvent="StopAlert" WidgetInfo=@widget />
@@ -216,9 +266,9 @@
                                                         }
                                                         @if (widget.WidgetInfo.WIDGETTYPE == 2)
                                                         {
-                                                            <TileLayoutItem class="@(widget.WidgetInfo.SEVERITY == 1?"dark-tile-layout-card-Normal":"dark-tile-layout-card-High")" ColSpan="3">
+                                                            <TileLayoutItem class="@(widget.WidgetInfo.COLOR != null?widget.WidgetInfo.COLOR:"dark-tile-layout")" ColSpan="3">
                                                                 <HeaderTemplate>
-                                                                    <h4 style="color:white;text-align:center ;height: 10px;">@(widget.WidgetInfo.CHECKTYPE == 1 ? widget.WidgetInfo.NAME : widget.WidgetInfo.NAME + " Starts Working at " + widget.WidgetInfo.AFTERTIME.Value.ToString("hh:mm tt"))</h4>
+                                                                    <h4 style="color:white;text-align:center ;height: 10px;"><strong>@(widget.WidgetInfo.CHECKTYPE == 1 ? widget.WidgetInfo.NAME : widget.WidgetInfo.NAME + " Starts Working at " + widget.WidgetInfo.AFTERTIME.Value.ToString("hh:mm tt"))</strong></h4>
                                                                 </HeaderTemplate>
                                                                 <Content>
                                                                     <StatusWidget SetAlertEvent="SetAlert" StopAlertEvent="StopAlert" WidgetInfo=@widget />
@@ -263,9 +313,9 @@
                                                     {
                                                         @if (widget.WidgetInfo.WIDGETTYPE == 1)
                                                         {
-                                                            <TileLayoutItem class="@(widget.WidgetInfo.SEVERITY == 1?"dark-tile-layout-card-Normal":"dark-tile-layout-card-High")" ColSpan="3">
+                                                            <TileLayoutItem class="@(widget.WidgetInfo.COLOR != null?widget.WidgetInfo.COLOR:"dark-tile-layout")" ColSpan="3">
                                                                 <HeaderTemplate>
-                                                                    <h4 style="color:white;text-align:center ;height: 10px;">@(widget.WidgetInfo.CHECKTYPE == 1 ? widget.WidgetInfo.NAME : widget.WidgetInfo.NAME + " Starts Working at " + widget.WidgetInfo.AFTERTIME.Value.ToString("hh:mm tt"))</h4>
+                                                                    <h4 style="color:white;text-align:center ;height: 10px;"><strong>@(widget.WidgetInfo.CHECKTYPE == 1 ? widget.WidgetInfo.NAME : widget.WidgetInfo.NAME + " Starts Working at " + widget.WidgetInfo.AFTERTIME.Value.ToString("hh:mm tt"))</strong></h4>
                                                                 </HeaderTemplate>
                                                                 <Content>
                                                                     <SyncWidgetComponent SetAlertEvent="SetAlert" StopAlertEvent="StopAlert" WidgetInfo=@widget />
@@ -274,9 +324,9 @@
                                                         }
                                                         @if (widget.WidgetInfo.WIDGETTYPE == 2)
                                                         {
-                                                            <TileLayoutItem class="@(widget.WidgetInfo.SEVERITY == 1?"dark-tile-layout-card-Normal":"dark-tile-layout-card-High")" ColSpan="3">
+                                                            <TileLayoutItem class="@(widget.WidgetInfo.COLOR != null?widget.WidgetInfo.COLOR:"dark-tile-layout")" ColSpan="3">
                                                                 <HeaderTemplate>
-                                                                    <h4 style="color:white;text-align:center ;height: 10px;">@(widget.WidgetInfo.CHECKTYPE == 1 ? widget.WidgetInfo.NAME : widget.WidgetInfo.NAME + " Starts Working at " + widget.WidgetInfo.AFTERTIME.Value.ToString("hh:mm tt"))</h4>
+                                                                    <h4 style="color:white;text-align:center ;height: 10px;"><strong>@(widget.WidgetInfo.CHECKTYPE == 1 ? widget.WidgetInfo.NAME : widget.WidgetInfo.NAME + " Starts Working at " + widget.WidgetInfo.AFTERTIME.Value.ToString("hh:mm tt"))</strong></h4>
                                                                 </HeaderTemplate>
                                                                 <Content>
                                                                     <StatusWidget SetAlertEvent="SetAlert" StopAlertEvent="StopAlert" WidgetInfo=@widget />

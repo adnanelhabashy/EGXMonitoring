@@ -12,7 +12,7 @@
         @(WidgetInfo.WidgetInfo.SEVERITY == 1 ? "Medium" : "High")
     </div>
 </div>
-<div class="card" id="Card-@WidgetInfo.WidgetInfo.NAME">
+<div class="card-@WidgetInfo.WidgetInfo.NAME" style="font-size:@(WidgetInfo.WidgetInfo.FONTSIZE)px" id="Card-@WidgetInfo.WidgetInfo.NAME">
 
     <div class="card-header border-transparent">
         <h3 class="card-title"><strong>Sync Widget</strong></h3>
@@ -136,7 +136,7 @@
                                         </tr>
                                         @foreach (DataRow row in group)
                                         {
-                                            <tr style="background-color:grey">
+                                            <tr >
                                                 @foreach (DataColumn column in table.Columns)
                                                 {
                                                     <td>@row[column]</td>
@@ -183,49 +183,6 @@
     <!-- /.card-footer -->
 </div>
 
-@* <WidgetInfoModal WidgetInfo="WidgetInfo"></WidgetInfoModal>
- *@
-
-
-<script>
-    window.enterFullScreen = function (elementId) {
-        const element = document.getElementById(elementId);
-        if (element.requestFullscreen) {
-            element.requestFullscreen();
-        } else if (element.mozRequestFullScreen) {
-            element.mozRequestFullScreen();
-        } else if (element.webkitRequestFullscreen) {
-            element.webkitRequestFullscreen();
-        } else if (element.msRequestFullscreen) {
-            element.msRequestFullscreen();
-        }
-    };
-
-    window.exitFullScreen = function () {
-        if (document.exitFullscreen) {
-            document.exitFullscreen();
-        } else if (document.mozCancelFullScreen) {
-            document.mozCancelFullScreen();
-        } else if (document.webkitExitFullscreen) {
-            document.webkitExitFullscreen();
-        } else if (document.msExitFullscreen) {
-            document.msExitFullscreen();
-        }
-    };
-
-    function toast(title, subtitle, body) {
-        const toastOptions = {
-            class: 'bg-danger',
-            title: title,
-            subtitle: subtitle,
-            body: body,
-            position: 'bottomLeft',
-            autohide: true,
-            delay: 10000,
-        };
-        $(document).Toasts('create', toastOptions);
-    }
-</script>
 
 @code {
     [Parameter]

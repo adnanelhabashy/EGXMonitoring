@@ -44,7 +44,10 @@ namespace EGXMonitoring.Shared
         [Required(ErrorMessage = "The Severity is required.")]
         public int? TABID { get; set; }
 
-
+        [Required(ErrorMessage = "The Color is required.")]
+        public string? COLOR { get; set; } = string.Empty;
+        [Required(ErrorMessage = "The Font Size is required.")]
+        public int? FONTSIZE { get; set; }
 
     }
 }
