@@ -7,11 +7,16 @@
 @using System.Data
 
 
-
+<div class="ribbon-wrapper">
+    <div class="ribbon @(WidgetInfo.WidgetInfo.SEVERITY == 1? "bg-warning":"bg-danger")">
+        @(WidgetInfo.WidgetInfo.SEVERITY == 1 ? "Medium" : "High")
+    </div>
+</div>
 <div class="card" id="Card-@WidgetInfo.WidgetInfo.NAME">
+
     <div class="card-header border-transparent">
         <h3 class="card-title"><strong>Sync Widget</strong></h3>
-
+       
         <div class="card-tools">
             <button type="button" @onclick="ToggleFullScreen" class="btn btn-tool">
                 <i class="fa fa-fw fa-bars"></i>

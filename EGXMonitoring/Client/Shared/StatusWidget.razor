@@ -10,6 +10,11 @@
 
 
 <div class="card-@WidgetInfo.WidgetInfo.NAME" id="Card-@WidgetInfo.WidgetInfo.NAME">
+    <div class="ribbon-wrapper">
+        <div class="ribbon @(WidgetInfo.WidgetInfo.SEVERITY == 1? "bg-warning":"bg-danger")">
+            @(WidgetInfo.WidgetInfo.SEVERITY == 1 ? "Medium" : "High")
+        </div>
+    </div>
     <div class="card-header border-transparent">
         <h3 class="card-title"><strong>Status Widget</strong></h3>
 
