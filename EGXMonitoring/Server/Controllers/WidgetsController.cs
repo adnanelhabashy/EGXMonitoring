@@ -80,6 +80,13 @@ namespace EGXMonitoring.Server.Controllers
             return Ok(response);
         }
 
+        [HttpPost("DeleteLayouts")]
+        public async Task<ActionResult<ServiceResponse<List<TabLayouts>>>> DeleteLayouts(List<TabLayouts> Layouts)
+        {
+            var response = await _widgetService.DeleteTabLayouts(Layouts);
+            return Ok(response);
+        }
+
 
         [HttpPost("restartBackGroundService"), AllowAnonymous]
         public async Task<IActionResult> RestartHostedService()

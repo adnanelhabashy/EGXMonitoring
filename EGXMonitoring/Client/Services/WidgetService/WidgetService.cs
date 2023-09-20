@@ -105,5 +105,12 @@ namespace EGXMonitoring.Client.Services.WidgetService
             var data = await result.Content.ReadFromJsonAsync<ServiceResponse<List<TabLayouts>>>();
             return data;
         }
+
+        public async Task<ServiceResponse<List<TabLayouts>>> DeleteTabsLayout(List<TabLayouts> TabsLayouts)
+        {
+            var result = await _http.PostAsJsonAsync("api/Widgets/DeleteLayouts", TabsLayouts);
+            var data = await result.Content.ReadFromJsonAsync<ServiceResponse<List<TabLayouts>>>();
+            return data;
+        }
     }
 }

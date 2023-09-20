@@ -114,52 +114,39 @@
                     <div class="row">
                         <div class="col-sm-6">
                             <div class="form-group">
-                                <label>Check Type</label>
-
-                                <InputSelect type="text" @bind-Value="WidgetInfo.WidgetInfo.CHECKTYPE" class="custom-select" @onchange="HandleCheckTypeChange" placeholder="">
-                                    <option value="1">Instant</option>
-                                    <option value="2">Time Interval</option>
-                                </InputSelect>
-                                <ValidationMessage For="@(() => WidgetInfo.WidgetInfo.CHECKTYPE)"></ValidationMessage>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-6">
-                            <div class="form-group">
                                 <label>Widget Color</label>
                                 <InputSelect type="text" @bind-Value="WidgetInfo.WidgetInfo.COLOR" class="custom-select" @onchange="HandleCheckTypeChange" placeholder="">
                                     <option value="dark-tile-layout-card-Red" style="background-color: #F44336;">
                                         Red
-                                        <span class="color-box" ></span>
+                                        <span class="color-box"></span>
                                     </option>
                                     <option value="dark-tile-layout-card-Teal" style="background-color: #009688 ;">
                                         Teal
-                                        <span class="color-box" ></span>
+                                        <span class="color-box"></span>
                                     </option>
                                     <option value="dark-tile-layout-card-BlueGrey" style="background-color: #607D8B;">
                                         Blue Grey
-                                        <span class="color-box" ></span>
+                                        <span class="color-box"></span>
                                     </option>
                                     <option value="dark-tile-layout-card-Indigo" style="background-color: #3F51B5 ;">
                                         Indigo
-                                        <span class="color-box" ></span>
+                                        <span class="color-box"></span>
                                     </option>
                                     <option value="dark-tile-layout-card-Green" style="background-color: #4CAF50;">
                                         Green
-                                        <span class="color-box" ></span>
+                                        <span class="color-box"></span>
                                     </option>
                                     <option value="dark-tile-layout-card-DeepOrange" style="background-color: #FF5722;">
                                         Deep Orange
-                                        <span class="color-box" ></span>
+                                        <span class="color-box"></span>
                                     </option>
                                     <option value="dark-tile-layout-card-Purple" style="background-color: #9C27B0;">
                                         Purple
-                                        <span class="color-box" ></span>
+                                        <span class="color-box"></span>
                                     </option>
                                     <option value="dark-tile-layout-card-Lime" style="background-color:#CDDC39;">
                                         Lime
-                                        <span class="color-box" ></span>
+                                        <span class="color-box"></span>
                                     </option>
                                     <option value="dark-tile-layout-card-Cyan" style="background-color:#00BCD4;">
                                         Cyan
@@ -167,7 +154,7 @@
                                     </option>
                                     <option value="dark-tile-layout-card-DeepPurple" style="background-color:#673AB7;">
                                         Deep Purple
-                                        <span class="color-box" ></span>
+                                        <span class="color-box"></span>
                                     </option>
                                     <option value="dark-tile-layout-card-Amber" style="background-color:#FFC107;">
                                         Amber
@@ -225,6 +212,20 @@
                             </div>
                         </div>
                     </div>
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="form-group">
+                                <label>Check Type</label>
+
+                                <InputSelect type="text" @bind-Value="WidgetInfo.WidgetInfo.CHECKTYPE" class="custom-select" @onchange="HandleCheckTypeChange" placeholder="">
+                                    <option value="1">Instant</option>
+                                    <option value="2">Time Interval</option>
+                                </InputSelect>
+                                <ValidationMessage For="@(() => WidgetInfo.WidgetInfo.CHECKTYPE)"></ValidationMessage>
+                            </div>
+                        </div>
+                    </div>
+                
                     @if (showTimeInputs || WidgetInfo.WidgetInfo.CHECKTYPE == 2)
                     {
                         <div class="bootstrap-timepicker row">

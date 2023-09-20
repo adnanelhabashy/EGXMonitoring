@@ -125,7 +125,10 @@
                                     @if (WidgetInfo.Data.Where(w => w.WidgetInfo.TABID == 1).Count() > 0)
                                     {
                                         <div class="button-container">
-                                            <button class="custom-button" @onclick='() => SaveLayout("during-seesion")'>Save Layout</button>
+                                            <button class="save-button" @onclick='() => SaveLayout("during-seesion")'>Save Layout</button>
+                                        </div>
+                                        <div class="button-container">
+                                            <button class="delete-button" @onclick='() => DeleteLayout("during-seesion")'>Delete Layout</button>
                                         </div>
                                         <TelerikTileLayout @ref="@TileDuringSessionInstance"
                                                            class="dark-tile-layout" Columns="12"
@@ -183,7 +186,10 @@
                                     @if (WidgetInfo.Data.Where(w => w.WidgetInfo.TABID == 2).Count() > 0)
                                     {
                                         <div class="button-container">
-                                            <button class="custom-button" @onclick='() => SaveLayout("end-of-day")'>Save Layout</button>
+                                            <button class="save-button" @onclick='() => SaveLayout("end-of-day")'>Save Layout</button>
+                                        </div>
+                                        <div class="button-container">
+                                            <button class="delete-button" @onclick='() => DeleteLayout("end-of-day")'>Delete Layout</button>
                                         </div>
                                         <TelerikTileLayout @ref="@TileEndOfDayInstance"
                                                            class="dark-tile-layout" Columns="12"
@@ -240,7 +246,10 @@
                                     @if (WidgetInfo.Data.Where(w => w.WidgetInfo.TABID == 3).Count() > 0)
                                     {
                                         <div class="button-container">
-                                            <button class="custom-button" @onclick='() => SaveLayout("running-procedures")'>Save Layout</button>
+                                            <button class="save-button" @onclick='() => SaveLayout("running-procedures")'>Save Layout</button>
+                                        </div>
+                                        <div class="button-container">
+                                            <button class="delete-button" @onclick='() => DeleteLayout("running-procedures")'>Delete Layout</button>
                                         </div>
                                         <TelerikTileLayout @ref="@TileRunningProceduresInstance"
                                                            class="dark-tile-layout" Columns="12"
@@ -297,7 +306,10 @@
                                     @if (WidgetInfo.Data.Where(w => w.WidgetInfo.TABID == 4).Count() > 0)
                                     {
                                         <div class="button-container">
-                                            <button class="custom-button" @onclick='() => SaveLayout("vetting")'>Save Layout</button>
+                                            <button class="save-button" @onclick='() => SaveLayout("vetting")'>Save Layout</button>
+                                        </div>
+                                        <div class="button-container">
+                                            <button class="delete-button" @onclick='() => DeleteLayout("vetting")'>Delete Layout</button>
                                         </div>
                                         <TelerikTileLayout @ref="@TileVettingInstance"
                                                            class="dark-tile-layout"
@@ -469,7 +481,7 @@
         SoundService.AlertTurnOff += async (args) => await StopAlert(args);
         SoundService.HighAlertTurnOff += async (args) => await StopAlert(args);
     }
-    private void SaveLayout(string tabName)
+    private async Task SaveLayout(string tabName)
     {
         TabLayouts layout = new TabLayouts()
             {
@@ -494,7 +506,55 @@
         }
         List<TabLayouts> layouts = new List<TabLayouts>();
         layouts.Add(layout);
-        WidgetService.SetTabsLayout(layouts);
+        var result = await WidgetService.SetTabsLayout(layouts);
+        if (result.Success)
+        {
+            await JSRuntime.InvokeVoidAsync("toastSuccess", "Success", "Update Status", "layout Saved");
+            
+        }
+        else
+        {
+            await JSRuntime.InvokeVoidAsync("toastDanger", "Error", "Update Status", result.Message);
+
+        }
+    }
+    private async Task DeleteLayout(string tabName)
+    {
+        TabLayouts layout = new TabLayouts()
+            {
+                USERID = UserId,
+                TABNAME = tabName,
+            };
+        switch (tabName)
+        {
+            case "during-seesion":
+                layout.TABSTATE = System.Text.Json.JsonSerializer.Serialize(TileDuringSessionInstance.GetState());
+                break;
+            case "end-of-day":
+                layout.TABSTATE = System.Text.Json.JsonSerializer.Serialize(TileEndOfDayInstance.GetState());
+                break;
+            case "running-procedures":
+                layout.TABSTATE = System.Text.Json.JsonSerializer.Serialize(TileRunningProceduresInstance.GetState());
+                break;
+            case "vetting":
+                layout.TABSTATE = System.Text.Json.JsonSerializer.Serialize(TileVettingInstance.GetState());
+                break;
+
+        }
+        List<TabLayouts> layouts = new List<TabLayouts>();
+        layouts.Add(layout);
+        var result = await WidgetService.DeleteTabsLayout(layouts);
+        if (result.Success)
+        {
+            await JSRuntime.InvokeVoidAsync("toastSuccess", "Success", "Update Status", "layout deleted");
+            await JSRuntime.InvokeVoidAsync("location.reload");
+
+        }
+        else
+        {
+            await JSRuntime.InvokeVoidAsync("toastDanger", "Error", "Update Status", result.Message);
+
+        }
     }
 
     private async Task GetTabStates()

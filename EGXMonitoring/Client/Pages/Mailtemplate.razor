@@ -1,0 +1,43 @@
+﻿@page "/mailedit"
+
+
+<br/>
+<section class="content">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card card-outline card-info">
+                <div class="card-header">
+                    <h3 class="card-title">
+                        Mail Template
+                    </h3>
+                </div>
+                <!-- /.card-header -->
+                <div class="card-body">
+                    <textarea id="summernote">
+
+                    </textarea>
+                </div>
+                <div class="card-footer">
+                </div>
+            </div>
+        </div>
+        <!-- /.col-->
+    </div>
+    <!-- ./row -->
+</section>
+
+<script>
+    $(function () {
+        // Summernote
+        $('#summernote').summernote()
+
+        // CodeMirror
+        CodeMirror.fromTextArea(document.getElementById("codeMirrorDemo"), {
+            mode: "htmlmixed",
+            theme: "monokai"
+        });
+    })
+</script>
+@code {
+
+}

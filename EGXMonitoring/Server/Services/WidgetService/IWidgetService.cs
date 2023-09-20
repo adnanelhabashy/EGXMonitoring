@@ -15,6 +15,7 @@ namespace EGXMonitoring.Server.Services.WidgetService
         Task<ServiceResponse<ClientWidget>> RemoveWidget(ClientWidget widget);
         Task<ServiceResponse<List<TabLayouts>>> GetTabLayouts();
         Task<ServiceResponse<List<TabLayouts>>> SetTabLayouts(List<TabLayouts> Layouts);
+        Task<ServiceResponse<List<TabLayouts>>> DeleteTabLayouts(List<TabLayouts> Layouts);
 
     }
 }

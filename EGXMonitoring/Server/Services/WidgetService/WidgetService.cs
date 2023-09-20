@@ -415,5 +415,38 @@ namespace EGXMonitoring.Server.Services.WidgetService
             }
           
         }
+
+        public async Task<ServiceResponse<List<TabLayouts>>> DeleteTabLayouts(List<TabLayouts> Layouts)
+        {
+            try
+            {
+                foreach (TabLayouts layout in Layouts)
+                {
+                    if (_context.TabsLayouts.Where(tl => tl.USERID == layout.USERID && tl.TABNAME == layout.TABNAME).ToList().Count() > 0)
+                    {
+                        TabLayouts DBLayout = _context.TabsLayouts.Where(tl => tl.USERID == layout.USERID && tl.TABNAME == layout.TABNAME).FirstOrDefault();
+                        DBLayout.TABSTATE = layout.TABSTATE;
+                        _context.TabsLayouts.Remove(DBLayout);
+                        await _context.SaveChangesAsync();
+                    }
+                    
+                }
+                return new ServiceResponse<List<TabLayouts>>()
+                {
+                    Data = Layouts,
+                    Success = true,
+                    Message = "Layouts Updated"
+                };
+            }
+            catch (Exception ex)
+            {
+                return new ServiceResponse<List<TabLayouts>>()
+                {
+                    Data = null,
+                    Success = false,
+                    Message = ex.Message
+                };
+            }
+        }
     }
 }
