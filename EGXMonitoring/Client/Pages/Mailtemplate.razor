@@ -1,43 +1,139 @@
 ﻿@page "/mailedit"
+@using EGXMonitoring.Client.Services.MailService
 
+@inject IMailService MailService
+@inject IJSRuntime JSRuntime
 
-<br/>
-<section class="content">
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card card-outline card-info">
-                <div class="card-header">
-                    <h3 class="card-title">
-                        Mail Template
-                    </h3>
-                </div>
-                <!-- /.card-header -->
-                <div class="card-body">
-                    <textarea id="summernote">
+<style>
+    .save-button {
+        background-color: #4CAF50; /* Set the background color */
+        color: white; /* Set the text color */
+        padding: 10px 20px; /* Add padding to the button */
+        border: none; /* Remove the default button border */
+        border-radius: 4px; /* Add rounded corners */
+        font-size: 16px; /* Set the font size */
+        cursor: pointer; /* Add a pointer cursor on hover */
+    }
 
-                    </textarea>
-                </div>
-                <div class="card-footer">
-                </div>
+        /* Style the button on hover */
+        .save-button:hover {
+            background-color: #45a049;
+        }
+    .chips-container {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 5px;
+    }
+
+    .chip {
+        display: flex;
+        align-items: center;
+        background-color: darkcyan;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        padding: 4px 8px;
+        font-size: 14px;
+    }
+
+        .chip span {
+            margin-right: 4px;
+        }
+
+    .close-button {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: #6c757d;
+    }
+</style>
+
+<br />
+<div>
+    <br />
+    <div class="chips-container">
+        @foreach (var recipient in SelectedRecipients)
+        {
+            <div class="chip">
+                <span>@recipient</span>
+                <button class="close-button" @onclick="() => RemoveRecipient(recipient)">&#10005;</button>
             </div>
-        </div>
-        <!-- /.col-->
+        }
     </div>
-    <!-- ./row -->
-</section>
+    <br />
+    <input type="text" style="width: 300px;" class="form-control" value="@newRecipient" @oninput="UpdateNewRecipient" @onkeydown="AddRecipient" placeholder="Add recipients..." />
+</div>
+<br />
+<BlazingComponents.Summernote.Editor @bind-content="@htmlContent" />
+
+
+<button class="save-button" @onclick="SaveChanges">Save</button>
 
 <script>
-    $(function () {
-        // Summernote
-        $('#summernote').summernote()
 
-        // CodeMirror
-        CodeMirror.fromTextArea(document.getElementById("codeMirrorDemo"), {
-            mode: "htmlmixed",
-            theme: "monokai"
-        });
-    })
+
+
 </script>
 @code {
+    private ElementReference emailBodyRef;
+    private List<string> SelectedRecipients { get; set; } = new List<string>();
+    private string newRecipient = string.Empty;
+    private string htmlContent = "";
+    Mail mail = new Mail();
 
+    // Mail mail = new Mail();
+
+    protected override async Task OnInitializedAsync()
+    {
+        var result = await MailService.GetMail();
+        mail = result.Success ? result.Data : new Mail();
+        SelectedRecipients = result.Success ? result.Data.RECIPENTS.Split(";").ToList() : new List<string>();
+        htmlContent = mail.MAIL_BODY;
+    }
+
+
+    private void UpdateNewRecipient(ChangeEventArgs e)
+    {
+        newRecipient = e.Value.ToString();
+    }
+
+    private void AddRecipient(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !string.IsNullOrEmpty(newRecipient))
+        {
+            SelectedRecipients.Add(newRecipient.Trim());
+            newRecipient = string.Empty;
+        }
+    }
+
+    private void RemoveRecipient(string recipient)
+    {
+        SelectedRecipients.Remove(recipient);
+    }
+
+
+    [JSInvokable]
+    public void UpdateHtmlContent(string content)
+    {
+        htmlContent = content;
+    }
+
+
+    private async Task SaveChanges()
+    {
+
+        mail.MAIL_BODY = htmlContent;
+        mail.RECIPENTS = string.Join(";", SelectedRecipients);
+        var result = await MailService.AddOrEdit(mail);
+        if (result.Success)
+        {
+            await JSRuntime.InvokeVoidAsync("toastSuccess", "Mail Template Save", "Status", result.Message);
+
+        }
+        else
+        {
+            await JSRuntime.InvokeVoidAsync("toastDanger", "Mail Template Save", "Status", result.Message);
+
+        }
+        StateHasChanged();
+    }
 }

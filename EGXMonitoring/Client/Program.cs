@@ -12,6 +12,7 @@ using EGXMonitoring.Client;
 
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
+using EGXMonitoring.Client.Services.MailService;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -25,6 +26,7 @@ builder.Services.AddScoped<IWidgetService, WidgetService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ISoundService, SoundService>();
+builder.Services.AddScoped<IMailService, MailService>();
 builder.Services.AddOptions();
 builder.Services.AddAuthorizationCore(options =>
 {

@@ -9,6 +9,7 @@ using System.Threading;
 using System.Timers;
 using Microsoft.Exchange.WebServices.Data;
 using System.Diagnostics;
+using EGXMonitoring.Server.Services.MailService;
 
 namespace EGXMonitoring.Server.HostedService
 {
@@ -16,12 +17,15 @@ namespace EGXMonitoring.Server.HostedService
     {
         private readonly CancellationTokenSource cancellationTokenSource;
         private readonly IWidgetService _WidgetService;
+        private readonly IMailService _MailService;
         private readonly List<System.Threading.Tasks.Task> runningTasks;
         private readonly IHost _applicationLifetime;
 
         public HostedBackGroundService(IServiceScopeFactory factory, IHost applicationLifetime)
         {
             _WidgetService = factory.CreateScope().ServiceProvider.GetRequiredService<IWidgetService>();
+            _MailService = factory.CreateScope().ServiceProvider.GetRequiredService<IMailService>();
+
             cancellationTokenSource = new CancellationTokenSource();
             runningTasks = new List<System.Threading.Tasks.Task>();
             _applicationLifetime = applicationLifetime;
@@ -97,7 +101,13 @@ namespace EGXMonitoring.Server.HostedService
                                 {
                                     if(mailEvents.Where(m => m.GroupName == group.Key && m.MailSent == true).Count() == 0)
                                     {
-                                        sendmail("adnan.ahmed@egx.com.eg", "error in " + widget.WidgetInfo.NAME + " in " + group.Key + "not in sync since " + ErrorTime[group.Key].ToString(), "error in " + widget.WidgetInfo.NAME + " in " + group.Key);
+                                        var mail = await _MailService.GetMail();
+                                        var body = mail.Data.MAIL_BODY;
+                                        body = body.Replace("##WIDGETNAME##", widget.WidgetInfo.NAME);
+                                        body = body.Replace("##ERROR##", group.Key + " not in sync since " + ErrorTime[group.Key].ToString());
+                                        body = body.Replace("##TIME##", "current time :" + DateTime.Now.ToString());
+                                        var to = mail.Data.RECIPENTS.Split(";").ToList();
+                                        sendmail(to, body, "error in " + widget.WidgetInfo.NAME);
 
                                         MailEvent sentMail = new MailEvent()
                                         {
@@ -121,7 +131,13 @@ namespace EGXMonitoring.Server.HostedService
                                     {
                                         if (mailEvents.Where(m => m.GroupName == group.Key && m.MailSent == true).Count() == 0)
                                         {
-                                            sendmail("adnan.ahmed@egx.com.eg", "error in " + widget.WidgetInfo.NAME + " in " + group.Key + " not in sync since " + ErrorTime[group.Key].ToString(), "error in " + widget.WidgetInfo.NAME + " in " + group.Key);
+                                            var mail = await _MailService.GetMail();
+                                            var body = mail.Data.MAIL_BODY;
+                                            body = body.Replace("##WIDGETNAME##", widget.WidgetInfo.NAME);
+                                            body = body.Replace("##ERROR##", group.Key + " not in sync since " + ErrorTime[group.Key].ToString());
+                                            body = body.Replace("##TIME##", "current time :" + DateTime.Now.ToString());
+                                            var to = mail.Data.RECIPENTS.Split(";").ToList();
+                                            sendmail(to, body, "error in " + widget.WidgetInfo.NAME);
 
                                             MailEvent sentMail = new MailEvent()
                                             {
@@ -177,24 +193,31 @@ namespace EGXMonitoring.Server.HostedService
                         if (row[widget.WidgetInfo.VALUECOLMN].ToString() == "-1")
                         {
                             string warningLevel = string.Empty;
-                            if (!ErrorTime.ContainsKey(row[widget.WidgetInfo.VALUECOLMN].ToString()))
+                            if (!ErrorTime.ContainsKey(row[widget.WidgetInfo.GROUPCOLUMN].ToString()))
                             {
-                                ErrorTime[row[widget.WidgetInfo.VALUECOLMN].ToString()] = DateTime.Now;
+                                ErrorTime[row[widget.WidgetInfo.GROUPCOLUMN].ToString()] = DateTime.Now;
                             }
 
 
                             if (widget.WidgetInfo.CHECKTYPE == 1)
                             {
-                                warningLevel = ProcessWarning(ErrorTime[row[widget.WidgetInfo.VALUECOLMN].ToString()], row[widget.WidgetInfo.GROUPCOLUMN].ToString(), widget.WidgetInfo.ALARMAFTER);
+                                warningLevel = ProcessWarning(ErrorTime[row[widget.WidgetInfo.GROUPCOLUMN].ToString()], row[widget.WidgetInfo.GROUPCOLUMN].ToString(), widget.WidgetInfo.ALARMAFTER);
                                 if (warningLevel == "4")
                                 {
-                                    if (mailEvents.Where(m => m.GroupName == row[widget.WidgetInfo.VALUECOLMN].ToString() && m.MailSent == true).Count() == 0)
+                                    if (mailEvents.Where(m => m.GroupName == row[widget.WidgetInfo.GROUPCOLUMN].ToString() && m.MailSent == true).Count() == 0)
                                     {
-                                        sendmail("adnan.ahmed@egx.com.eg", "error in " + widget.WidgetInfo.NAME + " in " + row[widget.WidgetInfo.VALUECOLMN].ToString() + " not in sync since " + ErrorTime[row[widget.WidgetInfo.VALUECOLMN].ToString()].ToString(), "error in " + widget.WidgetInfo.NAME + " in " + row[widget.WidgetInfo.VALUECOLMN].ToString());
+                                        var mail = await _MailService.GetMail();
+                                        var body = mail.Data.MAIL_BODY;
+                                        body = body.Replace("##WIDGETNAME##", widget.WidgetInfo.NAME);
+                                        body = body.Replace("##ERROR##", row[widget.WidgetInfo.GROUPCOLUMN] + " faulty since " + ErrorTime[row[widget.WidgetInfo.GROUPCOLUMN].ToString()].ToString());
+                                        body = body.Replace("##TIME##", "current time :" + DateTime.Now.ToString());
+                                        var to = mail.Data.RECIPENTS.Split(";").ToList();
+                                        sendmail(to, body, "error in " + widget.WidgetInfo.NAME);
+
 
                                         MailEvent sentMail = new MailEvent()
                                         {
-                                            GroupName = row[widget.WidgetInfo.VALUECOLMN].ToString(),
+                                            GroupName = row[widget.WidgetInfo.GROUPCOLUMN].ToString(),
                                             SentOn = DateTime.Now,
                                             MailSent = true
                                         };
@@ -216,11 +239,17 @@ namespace EGXMonitoring.Server.HostedService
                                     {
                                         if (mailEvents.Where(m => m.GroupName == row[widget.WidgetInfo.VALUECOLMN].ToString() && m.MailSent == true).Count() == 0)
                                         {
-                                            sendmail("adnan.ahmed@egx.com.eg", "error in " + widget.WidgetInfo.NAME + " in " + row[widget.WidgetInfo.VALUECOLMN].ToString() + " not in sync since " + ErrorTime[row[widget.WidgetInfo.VALUECOLMN].ToString()].ToString(), "error in " + widget.WidgetInfo.NAME + " in " + row[widget.WidgetInfo.VALUECOLMN].ToString());
+                                            var mail = await _MailService.GetMail();
+                                            var body = mail.Data.MAIL_BODY;
+                                            body = body.Replace("##WIDGETNAME##", widget.WidgetInfo.NAME);
+                                            body = body.Replace("##ERROR##", row[widget.WidgetInfo.GROUPCOLUMN] + " faulty since " + ErrorTime[row[widget.WidgetInfo.GROUPCOLUMN].ToString()].ToString());
+                                            body = body.Replace("##TIME##", "current time :" + DateTime.Now.ToString());
+                                            var to = mail.Data.RECIPENTS.Split(";").ToList();
+                                            sendmail(to, body, "error in " + widget.WidgetInfo.NAME);
 
                                             MailEvent sentMail = new MailEvent()
                                             {
-                                                GroupName = row[widget.WidgetInfo.VALUECOLMN].ToString(),
+                                                GroupName = row[widget.WidgetInfo.GROUPCOLUMN].ToString(),
                                                 SentOn = DateTime.Now,
                                                 MailSent = true
                                             };
@@ -236,13 +265,13 @@ namespace EGXMonitoring.Server.HostedService
                         }
                         else
                         {
-                            if (ErrorTime.ContainsKey(row[widget.WidgetInfo.VALUECOLMN].ToString()))
+                            if (ErrorTime.ContainsKey(row[widget.WidgetInfo.GROUPCOLUMN].ToString()))
                             {
-                                ErrorTime = RemoveErrorTime(row[widget.WidgetInfo.VALUECOLMN].ToString(), ErrorTime);
+                                ErrorTime = RemoveErrorTime(row[widget.WidgetInfo.GROUPCOLUMN].ToString(), ErrorTime);
                             }
-                            if (mailEvents.Where(m => m.GroupName == row[widget.WidgetInfo.VALUECOLMN].ToString() && m.MailSent == true).Count() > 0)
+                            if (mailEvents.Where(m => m.GroupName == row[widget.WidgetInfo.GROUPCOLUMN].ToString() && m.MailSent == true).Count() > 0)
                             {
-                                mailEvents.RemoveAll(m => m.GroupName == row[widget.WidgetInfo.VALUECOLMN].ToString());
+                                mailEvents.RemoveAll(m => m.GroupName == row[widget.WidgetInfo.GROUPCOLUMN].ToString());
                             }
                         }
                     }
@@ -343,7 +372,7 @@ namespace EGXMonitoring.Server.HostedService
             await _applicationLifetime.StartAsync();
         }
 
-        private void sendmail(string to, string body, string subject)
+        private void sendmail(List<string> to, string body, string subject)
         {
 
             ExchangeService exchangeService = new ExchangeService(ExchangeVersion.Exchange2016);
@@ -354,7 +383,11 @@ namespace EGXMonitoring.Server.HostedService
             EmailMessage email = new EmailMessage(exchangeService);
             email.Subject = subject;
             email.Body = new MessageBody(body);
-            email.ToRecipients.Add(to);
+            foreach(var tomail in to)
+            {
+                email.ToRecipients.Add(tomail);
+            }
+            
             email.SendAndSaveCopy();
 
             Console.WriteLine("Mails sent");

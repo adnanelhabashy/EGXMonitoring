@@ -13,5 +13,6 @@ namespace EGXMonitoring.Server.Data
         public DbSet<User> Users { get; set; }
         public DbSet<UserWidgets> UsersWidgets { get; set; }
         public DbSet<TabLayouts> TabsLayouts { get; set; }
+        public DbSet<Mail> Mails { get; set; }
     }
 }

@@ -8,6 +8,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.EntityFrameworkCore;
 using EGXMonitoring.Server.HostedService;
 using Microsoft.Extensions.DependencyInjection;
+using EGXMonitoring.Server.Services.MailService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -31,6 +32,7 @@ builder.Services.AddHostedService<HostedBackGroundService>();
 builder.Services.AddScoped<IWidgetService, WidgetService>();
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IMailService, MailService>();
 
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

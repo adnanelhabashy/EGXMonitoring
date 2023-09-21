@@ -47,6 +47,7 @@ namespace EGXMonitoring.Server.Controllers
         }
 
         [HttpPost("addwidget")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ServiceResponse<User>>> AddWidget(ClientWidget widget)
         {
             var response = await _widgetService.AddWidget(widget);
@@ -54,6 +55,7 @@ namespace EGXMonitoring.Server.Controllers
         }
 
         [HttpPost("updatewidget")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ServiceResponse<User>>> UpdateWidget(ClientWidget widget)
         {
             var response = await _widgetService.UpdateWidget(widget);
@@ -61,6 +63,7 @@ namespace EGXMonitoring.Server.Controllers
         }
 
         [HttpPost("deletewidget")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<ServiceResponse<User>>> DeleteWidget(ClientWidget widget)
         {
             var response = await _widgetService.RemoveWidget(widget);

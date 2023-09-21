@@ -48,6 +48,8 @@ namespace EGXMonitoring.Shared
         public string? COLOR { get; set; } = string.Empty;
         [Required(ErrorMessage = "The Font Size is required.")]
         public int? FONTSIZE { get; set; }
-
+        [Required(ErrorMessage = "The Send Mail is required.")]
+        public int? SENDMAIL { get; set; }
+        
     }
 }

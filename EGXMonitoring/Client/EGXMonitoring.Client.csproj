@@ -8,6 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Blazor.SummerNote" Version="0.0.9" />
     <PackageReference Include="Blazored.LocalStorage" Version="4.4.0" />
     <PackageReference Include="Microsoft.AspNetCore.Components.Authorization" Version="6.0.20" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="6.0.20" />
