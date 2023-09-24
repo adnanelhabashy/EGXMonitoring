@@ -8,14 +8,14 @@
   "prefer_related_applications": false,
   "icons": [
     {
-      "src": "icon-512.png",
+      "src": "EGX512.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "511x511"
     },
     {
-      "src": "icon-192.png",
+      "src": "EGX192.png",
       "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "194x199"
     }
   ]
 }
