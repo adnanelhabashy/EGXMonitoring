@@ -64,7 +64,7 @@ namespace EGXMonitoring.Server.Services.UsersService
             try
             {
                 user.ISACTIVE = 0;
-                _context.Users.Update(user);
+                _context.Users.Remove(user);
                 await _context.SaveChangesAsync();
                 return new ServiceResponse<User>()
                 {

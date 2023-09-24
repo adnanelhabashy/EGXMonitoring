@@ -26,7 +26,7 @@ builder.Services.AddRazorPages();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-builder.Services.AddSingleton<IHostedService,HostedBackGroundService>();
+builder.Services.AddSingleton<HostedBackGroundService>();
 builder.Services.AddHostedService<HostedBackGroundService>();
 
 builder.Services.AddScoped<IWidgetService, WidgetService>();

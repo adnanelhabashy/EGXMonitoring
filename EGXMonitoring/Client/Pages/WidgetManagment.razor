@@ -2,6 +2,7 @@
 @inject IWidgetService WidgetService
 @inject NavigationManager NavigationManager
 @inject IJSRuntime JSRuntime
+@inject HttpClient _http
 @implements IDisposable
 
 <PageTitle>Widget Managment</PageTitle>
@@ -12,6 +13,10 @@
     <span class="oi oi-plus"></span> Add Widget
 </button>
 <br />
+<br />
+<button type="button" class="btn btn-warning btn-lg" @onclick="RestartBgs">
+    <i class="fa fa-fw fa-retweet"></i> Restart BGS
+</button>
 <div style="text-align: center;">
     <h4>Sync Widgets</h4>
 </div>
@@ -102,8 +107,8 @@ else
                             <div class="small-box @(widget.WidgetInfo.SEVERITY == 1?"bg-info":"bg-warning") ">
                                 <div class="inner">
                                     <h3>@widget.WidgetInfo.NAME</h3>
-                                    <p>@widget.WidgetInfo.DESCRIPTION</p>
-                                    <p>Tab : @GetTabName(@widget.WidgetInfo.TABID)</p>
+                                    <p><strong>Description : </strong>@widget.WidgetInfo.DESCRIPTION</p>
+                                    <p><strong>Tab : </strong>@GetTabName(@widget.WidgetInfo.TABID)</p>
                                     <p style="@(widget.WidgetInfo.SEVERITY == 2?"color:red;":"")"><strong>Severity : </strong>@(widget.WidgetInfo.SEVERITY == 1 ? "Medium" : "High")</p>
                                 </div>
                                 <div class="icon">
@@ -156,7 +161,7 @@ else
 
     private void HandleDataChanged()
     {
-        
+
         JSRuntime.InvokeVoidAsync("location.reload");
     }
 
@@ -173,6 +178,21 @@ else
             // Unsubscribe from the event when the component is disposed
             WidgetService.OnChange -= HandleDataChanged;
             isSubscribed = false;
+        }
+    }
+
+    private async Task RestartBgs()
+    {
+        var response = await _http.GetFromJsonAsync<ServiceResponse<string>>("api/Widgets/restartBackGroundService");
+        if (response.Success)
+        {
+            await JSRuntime.InvokeVoidAsync("toastSuccess", "BGS Status", "Update Status", response.Message);
+           
+        }
+        else
+        {
+            await JSRuntime.InvokeVoidAsync("toastDanger", "BGS Status", "Update Status", response.Message);
+
         }
     }
 

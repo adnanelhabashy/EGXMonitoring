@@ -40,6 +40,7 @@ namespace EGXMonitoring.Server.Services.AuthService
             }
             else
             {
+                response.Success = true;
                 response.Data = CreateToken(user);
             }
             return response;

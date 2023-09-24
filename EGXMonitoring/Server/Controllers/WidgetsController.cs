@@ -5,6 +5,9 @@ using EGXMonitoring.Shared.DTOS;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 using EGXMonitoring.Server.HostedService;
+using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Hosting.Internal;
+using System.Threading.Tasks;
 
 
 namespace EGXMonitoring.Server.Controllers
@@ -15,12 +18,13 @@ namespace EGXMonitoring.Server.Controllers
     public class WidgetsController : ControllerBase
     {
         private readonly IWidgetService _widgetService;
-        private readonly IHostedService _HostedService;
+        private readonly HostedBackGroundService _backgroundService;
 
-        public WidgetsController(IWidgetService widgetService,IHostedService hostedService)
+        public WidgetsController(IWidgetService widgetService,HostedBackGroundService backgroundService)
         {
             _widgetService = widgetService;
-            _HostedService = hostedService;
+            _backgroundService = backgroundService;
+
         }
         [HttpGet]
         public async Task<ActionResult<ServiceResponse<List<ClientWidget>>>> GetWidgetInfo()
@@ -91,13 +95,32 @@ namespace EGXMonitoring.Server.Controllers
         }
 
 
-        [HttpPost("restartBackGroundService"), AllowAnonymous]
+        [HttpGet("restartBackGroundService"), AllowAnonymous]
         public async Task<IActionResult> RestartHostedService()
         {
-                await _HostedService.StopAsync(new System.Threading.CancellationToken());
-                await _HostedService.StartAsync(new System.Threading.CancellationToken());
-         
-            return Ok("Hosted service restart initiated.");
+            try
+            {
+                await _backgroundService.StopAsync(CancellationToken.None);
+                await _backgroundService.StartAsync(CancellationToken.None);
+
+
+                return Ok(new ServiceResponse<string>()
+                {
+                    Data = "Service Restarted Successfully.",
+                    Success = true,
+                    Message = "Service Restarted Successfully."
+                });
+            }
+            catch(Exception ex)
+            {
+                return Ok(new ServiceResponse<string>()
+                {
+                    Data = "Erro Happened while restarting",
+                    Success = true,
+                    Message = ex.Message
+                });
+            }
+ 
         }
 
     }

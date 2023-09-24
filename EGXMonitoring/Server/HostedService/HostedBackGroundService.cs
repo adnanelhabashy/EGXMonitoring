@@ -53,10 +53,13 @@ namespace EGXMonitoring.Server.HostedService
 
             }
 
+            Console.WriteLine("BGS started");
+
 
         }
         public System.Threading.Tasks.Task StopAsync(CancellationToken cancellationToken)
         {
+            Console.WriteLine("BGS stopped");
             return System.Threading.Tasks.Task.CompletedTask;
         }
 
